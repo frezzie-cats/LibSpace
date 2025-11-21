@@ -1,0 +1,50 @@
+/* |--------------------------------------------------------------------------
+| Tailwind CSS Imports
+|--------------------------------------------------------------------------
+| The core Tailwind directives must come first.
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* |--------------------------------------------------------------------------
+| Custom Fixes & Professional Styling
+|--------------------------------------------------------------------------
+| Your custom styles applied last.
+*/
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f6f9; /* Light gray background */
+}
+
+/* Ensure our staff panel is centered and looks professional */
+.staff-content {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Custom Status Badges (Tailwind colors will handle this better, but keeping for now) */
+.status-available {
+    background-color: #d1e7dd; /* Light Green */
+    color: #0f5132; /* Dark Green */
+    border-color: #badbcc;
+}
+
+.status-maintenance {
+    background-color: #fff3cd; /* Light Yellow */
+    color: #664d03; /* Dark Yellow */
+    border-color: #ffecb5;
+}
+
+.status-not-available {
+    background-color: #f8d7da; /* Light Red */
+    color: #842029; /* Dark Red */
+    border-color: #f5c2c7;
+}
+
+/* Removed Bootstrap-specific form fix */
+/* select, input[type="text"], input[type="number"], textarea {
+    border-radius: 0.25rem !important;
+} */

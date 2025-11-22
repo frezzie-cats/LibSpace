@@ -39,7 +39,9 @@ class FacilityController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:facilities,name',
             'description' => 'nullable|string',
-            'type' => 'required|string',
+            // --- FIX START: Use Rule::in to restrict 'type' to the exact values expected by the database/form. ---
+            'type' => ['required', 'string', Rule::in(['room', 'pad', 'equipment'])],
+            // --- FIX END ---
             'capacity' => 'required|integer|min:1',
             // Ensure status is one of the allowed values
             'status' => ['required', Rule::in(['available', 'not available', 'under maintenance'])],
@@ -50,7 +52,7 @@ class FacilityController extends Controller
 
         // 3. Redirect back to the index page with a success message
         return redirect()->route('staff.facilities.index')
-                         ->with('success', 'Facility created successfully!');
+                             ->with('success', 'Facility created successfully!');
     }
 
     /**
@@ -74,7 +76,9 @@ class FacilityController extends Controller
             // Rule::unique ignores the current facility's ID
             'name' => ['required', 'string', 'max:255', Rule::unique('facilities')->ignore($facility->id)],
             'description' => 'nullable|string',
-            'type' => 'required|string',
+            // --- FIX START: Use Rule::in to restrict 'type' to the exact values expected by the database/form. ---
+            'type' => ['required', 'string', Rule::in(['room', 'pad', 'equipment'])],
+            // --- FIX END ---
             'capacity' => 'required|integer|min:1',
             // Crucially, this allows staff to update the status
             'status' => ['required', Rule::in(['available', 'not available', 'under maintenance'])],
@@ -85,7 +89,7 @@ class FacilityController extends Controller
 
         // 3. Redirect back to the index page with a success message
         return redirect()->route('staff.facilities.index')
-                         ->with('success', 'Facility updated successfully, including status.');
+                             ->with('success', 'Facility updated successfully, including status.');
     }
 
     /**
@@ -99,6 +103,6 @@ class FacilityController extends Controller
 
         // 2. Redirect back to the index page with a success message
         return redirect()->route('staff.facilities.index')
-                         ->with('success', 'Facility deleted successfully.');
+                             ->with('success', 'Facility deleted successfully.');
     }
 }

@@ -42,8 +42,8 @@
                             <x-nav-link :href="route('student.bookings.index')" :active="request()->routeIs('student.bookings.index')">
                                 My Bookings
                             </x-nav-link>
-                            <x-nav-link href="#">
-                                Give Feedback (TBA)
+                            <x-nav-link :href="route('student.feedbacks.index')" :active="request()->routeIs('student.feedback.index')">
+                                Give Feedback
                             </x-nav-link>
                         </div>
                     </div>
@@ -113,8 +113,8 @@
                     <x-responsive-nav-link :href="route('student.bookings.index')" :active="request()->routeIs('student.bookings.index')">
                         My Bookings
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link href="#">
-                        Give Feedback (TBA)
+                    <x-responsive-nav-link :href="route('student.feedbacks.index')" :active="request()->routeIs('student.feedback.index')">
+                        Give Feedback
                     </x-responsive-nav-link>
                 </div>
 

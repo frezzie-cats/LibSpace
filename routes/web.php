@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\FacilityController as StaffFacilityController;
 use App\Http\Controllers\Student\FacilityController as StudentFacilityController; // NEW IMPORT
 use App\Http\Controllers\Student\BookingController; // NEW IMPORT
+use App\Http\Controllers\Student\FeedbackController; // NEW IMPORT
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; // <-- ADDED to fix Undefined method 'user' and 'id'
 
@@ -84,6 +85,10 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
 
     // Cancel a booking (DELETE request)
     Route::delete('bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+
+    
+    Route::get('feedbacks', [FeedbackController::class, 'index'])->name('feedbacks.index');
+    Route::post('feedbacks', [FeedbackController::class, 'store'])->name('feedbacks.store');
 
 });
 

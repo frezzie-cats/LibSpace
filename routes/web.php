@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\FacilityController as StaffFacilityController;
-use App\Http\Controllers\Student\FacilityController as StudentFacilityController; // NEW IMPORT
-use App\Http\Controllers\Student\BookingController; // NEW IMPORT
+use App\Http\Controllers\Staff\BookingManagementController; // <-- NEW IMPORT
+use App\Http\Controllers\Student\FacilityController as StudentFacilityController;
+use App\Http\Controllers\Student\BookingController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth; // <-- ADDED to fix Undefined method 'user' and 'id'
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +18,7 @@ use Illuminate\Support\Facades\Auth; // <-- ADDED to fix Undefined method 'user'
 Route::get('/', function () {
     // Determine where to redirect based on authentication and role
     if (Auth::check()) {
-        if (Auth::user()->role === 'staff') {
+        if (Auth::user()->role === User::ROLE_STAFF) {
             return redirect()->route('staff.dashboard');
         } else {
             // Default student redirect
@@ -28,10 +30,10 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     // Dashboard redirect based on role
-    if (Auth::user()->role === 'staff') {
+    if (Auth::user()->role === User::ROLE_STAFF) {
         return redirect()->route('staff.dashboard');
     }
-    // Student redirect (or standard Breeze dashboard, though we'll use student.facilities.index)
+    // Student redirect
     return redirect()->route('student.facilities.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -48,7 +50,8 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
+Route::middleware(['auth', 'role:' . User::ROLE_STAFF])->prefix('staff')->name('staff.')->group(function () {
+    
     // Staff Dashboard
     Route::get('/dashboard', function () {
         return view('staff.dashboard');
@@ -56,6 +59,12 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
 
     // Facility Management CRUD
     Route::resource('facilities', StaffFacilityController::class)->except(['show']);
+    
+    // ----------------------------------------------------
+    // Booking Overview and Management (NEW)
+    // ----------------------------------------------------
+    Route::get('bookings', [BookingManagementController::class, 'index'])->name('bookings.index');
+    Route::get('bookings/{booking}', [BookingManagementController::class, 'show'])->name('bookings.show');
 });
 
 
@@ -65,24 +74,15 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
+Route::middleware(['auth', 'role:' . User::ROLE_STUDENT])->prefix('student')->name('student.')->group(function () {
 
     // 1. Facility Viewing (Equivalent to the student's main dashboard)
-    // List all available facilities for booking
     Route::get('facilities', [StudentFacilityController::class, 'index'])->name('facilities.index');
-    
-    // View a single facility to see available time slots and capacity
     Route::get('facilities/{facility}', [StudentFacilityController::class, 'show'])->name('facilities.show');
 
-
     // 2. Booking Management (CRUD)
-    // List the student's personal bookings
     Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
-    
-    // Store a new booking (POST request from facilities.show page)
     Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
-
-    // Cancel a booking (DELETE request)
     Route::delete('bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
 
 });

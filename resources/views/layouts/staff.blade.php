@@ -42,8 +42,9 @@
                             <x-nav-link :href="route('staff.facilities.index')" :active="request()->routeIs('staff.facilities.*')">
                                 Facilities
                             </x-nav-link>
-                            <x-nav-link href="#">
-                                Bookings (TBA)
+                            <!-- CORRECTED LINK -->
+                            <x-nav-link :href="route('staff.bookings.index')" :active="request()->routeIs('staff.bookings.*')">
+                                Booking Overview
                             </x-nav-link>
                         </div>
                     </div>
@@ -113,8 +114,9 @@
                     <x-responsive-nav-link :href="route('staff.facilities.index')" :active="request()->routeIs('staff.facilities.*')">
                         Facilities
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link href="#">
-                        Bookings (TBA)
+                    <!-- CORRECTED LINK -->
+                    <x-responsive-nav-link :href="route('staff.bookings.index')" :active="request()->routeIs('staff.bookings.*')">
+                        Booking Overview
                     </x-responsive-nav-link>
                 </div>
 
@@ -135,7 +137,7 @@
                             @csrf
                             <x-responsive-nav-link :href="route('logout')"
                                     onclick="event.preventDefault();
-                                                this.closest('form').submit();"
+                                             this.closest('form').submit();"
                                     class="text-red-500 hover:text-red-300">
                                 Log Out
                             </x-responsive-nav-link>
@@ -146,7 +148,6 @@
         </nav>
 
         <!-- Main Staff Content Area -->
-        <!-- Adjusted main content area for better consistency with Breeze layout -->
         <main class="py-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="staff-content">
                 <!-- Session Status / Success Messages - CONVERTED TO TAILWIND ALERTS -->

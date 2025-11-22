@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <!-- Card 2: Booking Schedule (Future) -->
+        <!-- Card 2: Booking Schedule (Active) -->
         <div class="h-full">
             <div class="bg-white shadow-md rounded-lg overflow-hidden border-l-4 border-indigo-600 h-full">
                 <div class="p-5">
@@ -43,8 +43,12 @@
                             <i class="fas fa-calendar-alt fa-2x"></i>
                         </div>
                     </div>
-                    <p class="text-gray-500 mt-4 mb-4">Review, approve, or decline student bookings and manage the daily schedule.</p>
-                    <button class="inline-block px-4 py-2 text-sm font-medium text-white bg-gray-400 rounded-lg cursor-not-allowed opacity-75" disabled>Go to Bookings (Phase 3)</button>
+                    <p class="text-gray-500 mt-4 mb-4">Monitor all student reservations, manage the daily schedule, and view booking history.</p>
+                    
+                    {{-- UPDATED: Active link using the defined route --}}
+                    <a href="{{ route('staff.bookings.index') }}" class="inline-block px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150">
+                        Go to Bookings Overview
+                    </a>
                 </div>
             </div>
         </div>

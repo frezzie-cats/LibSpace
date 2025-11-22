@@ -6,6 +6,7 @@ use App\Http\Controllers\Staff\BookingManagementController; // <-- NEW IMPORT
 use App\Http\Controllers\Student\FacilityController as StudentFacilityController;
 use App\Http\Controllers\Student\BookingController;
 use App\Models\User;
+use App\Http\Controllers\Student\FeedbackController; // NEW IMPORT
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -84,6 +85,10 @@ Route::middleware(['auth', 'role:' . User::ROLE_STUDENT])->prefix('student')->na
     Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::delete('bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+
+    
+    Route::get('feedbacks', [FeedbackController::class, 'index'])->name('feedbacks.index');
+    Route::post('feedbacks', [FeedbackController::class, 'store'])->name('feedbacks.store');
 
 });
 

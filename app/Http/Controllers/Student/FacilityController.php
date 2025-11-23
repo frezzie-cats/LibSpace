@@ -7,44 +7,49 @@ use App\Models\Facility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View; // Keep this
-use Illuminate\Http\RedirectResponse; // <-- ADDED: For type-hinting redirects
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 use Carbon\Carbon;
 
 class FacilityController extends Controller
 {
-    // The working hours and booking duration rules
-    private $intervalMinutes = 60;
-    private $startTime = '09:00:00';
-    private $endTime = '17:00:00';
-    private $maxBookingDurationHours = 2;
+    // The maximum booking duration rule is strictly 1 hour.
+    private $maxBookingDurationHours = 1; 
+
+    // --- TEMPORARILY EXTENDED UNIVERSITY HOURS FOR TESTING ---
+    private $fixedOpeningTime = '08:00:00';
+    private $fixedClosingTime = '18:00:00'; 
+    // --------------------------------------------------------
 
     /**
      * Display a listing of available facilities.
-     * * @return View
+     * @return View
      */
     public function index(): View
     {
-        $facilities = Facility::where('status', 'available')->orderBy('name')->get();
+        $facilities = Facility::where('status', 'available')->orderBy('name')->get(); 
         return view('student.facilities.index', compact('facilities'));
     }
 
     /**
      * Show the facility details and available booking slots.
-     * * @param Facility $facility
+     * @param Facility $facility
      * @param Request $request
-     * @return View|RedirectResponse // <-- MODIFIED: Allow View or RedirectResponse
+     * @return View|RedirectResponse
      */
     public function show(Facility $facility, Request $request): View|RedirectResponse
     {
-        // 1. Get and validate the requested date
-        $bookingDate = $request->input('date', Carbon::now()->format('Y-m-d'));
+        // 1. HARDCODE BOOKING DATE TO TODAY ONLY
+        $bookingDate = Carbon::now()->format('Y-m-d');
         $selectedDate = Carbon::parse($bookingDate);
-        $today = Carbon::now()->startOfDay();
 
-        // Prevent booking in the past
-        if ($selectedDate->isBefore($today)) {
-            return redirect()->route('student.facilities.show', $facility)->with('error', 'You cannot view availability for a past date.');
+        // Prevent booking if the facility is closed for the day
+        $now = Carbon::now();
+        $closingTimeToday = Carbon::parse($bookingDate . ' ' . $this->fixedClosingTime);
+        
+        if ($now->greaterThanOrEqualTo($closingTimeToday)) {
+            // Note: Use the original closing time in the error message, even if the internal limit is extended.
+            return redirect()->route('student.facilities.index')->with('error', 'Booking is closed for today. Facilities close at 6:00 PM.'); 
         }
 
         // 2. Initial check on facility status
@@ -52,80 +57,81 @@ class FacilityController extends Controller
             return redirect()->route('student.facilities.index')->with('error', 'This facility is currently unavailable for booking.');
         }
 
-        // 3. Generate all potential slots for the day
-        $allSlots = $this->generatePossibleSlots();
-        
-        // 4. Fetch confirmed bookings for the selected date
+        // 3. Fetch confirmed bookings for the selected date (Today)
         $confirmedBookings = $facility->bookings()
             ->where('booking_date', $bookingDate)
             ->where('status', 'confirmed')
             ->get();
 
-        // 5. Determine available slots
-        $availableSlots = [];
-        $currentTime = Carbon::now();
-        $isToday = $selectedDate->isSameDay($currentTime);
-
-        foreach ($allSlots as $slot) {
-            $slotStart = Carbon::parse($bookingDate . ' ' . $slot['start_time']);
-            
-            $isFuture = true;
-            if ($isToday && $slotStart->lessThanOrEqualTo($currentTime)) {
-                // For today, only show slots that haven't started yet
-                $isFuture = false;
-            }
-
-            // Count current confirmed bookings that overlap with this slot
-            $currentBookings = $confirmedBookings->filter(function ($booking) use ($slot) {
-                // Overlap check: start < B_end AND end > B_start
-                return $slot['start_time'] < $booking->end_time && $slot['end_time'] > $booking->start_time;
-            })->count();
-
-            // Only add the slot if capacity hasn't been reached
-            if ($currentBookings < $facility->capacity) {
-                $availableSlots[] = array_merge($slot, [
-                    'current_bookings' => $currentBookings,
-                    'is_future' => $isFuture,
-                ]);
-            }
-        }
+        // 4. Generate all potential slots and determine availability
+        $availableSlots = $this->generateAvailableSlots(
+            $facility,
+            $bookingDate,
+            $confirmedBookings
+        );
 
         return view('student.facilities.show', [
             'facility' => $facility,
-            'bookingDate' => $bookingDate,
+            'bookingDate' => $bookingDate, 
             'selectedDate' => $selectedDate,
             'availableSlots' => $availableSlots,
+            'maxDuration' => $this->maxBookingDurationHours,
         ]);
     }
 
     /**
-     * Generates all possible 1-hour slots based on facility hours.
+     * Generates fixed 1-hour slots based on FIXED facility hours.
+     * @param Facility $facility
+     * @param string $bookingDate
+     * @param \Illuminate\Support\Collection $confirmedBookings
+     * @return array
      */
-    private function generatePossibleSlots(): array
+    private function generateAvailableSlots(Facility $facility, string $bookingDate, $confirmedBookings): array
     {
         $slots = [];
-        $current = Carbon::parse($this->startTime);
-        $end = Carbon::parse($this->endTime);
+        
+        // --- HARDCODED UNIVERSITY HOURS ---
+        $current = Carbon::parse($this->fixedOpeningTime);
+        $end = Carbon::parse($this->fixedClosingTime);
+        
+        $currentTime = Carbon::now();
+        $isToday = Carbon::parse($bookingDate)->isSameDay($currentTime);
+        
+        // We will generate fixed 1-hour slots
+        while ($current->lt($end)) {
+            $slotStart = $current->copy();
+            $slotEnd = $current->copy()->addHour(); // The booking is always 1 hour
 
-        while ($current->lessThan($end)) {
-            $next = $current->copy()->addHours($this->maxBookingDurationHours); 
-            
-            // Adjust to the max end time if it goes over
-            if ($next->greaterThan($end)) {
-                $next = $end;
+            if ($slotEnd->gt($end)) {
+                break;
             }
 
-            // Only generate slots that are at least one hour long
-            if ($next->diffInMinutes($current) >= 60) {
-                 $slots[] = [
-                    'start_time' => $current->format('H:i:s'),
-                    'end_time' => $next->format('H:i:s'),
-                    'label' => $current->format('g:i A') . ' - ' . $next->format('g:i A'),
-                ];
+            $isFuture = true;
+            if ($isToday && $slotStart->lt($currentTime)) {
+                // For today, if the slot start time is in the past, mark it as unavailable/past
+                $isFuture = false;
             }
-            
-            // Move to the next interval (which is 1 hour in our setup for continuous booking)
-            $current->addMinutes($this->intervalMinutes);
+
+            // Check how many confirmed bookings overlap with this specific 1-hour slot
+            $currentBookings = $confirmedBookings->filter(function ($booking) use ($slotStart, $slotEnd) {
+                // Overlap condition: Booking start time is before slot end time AND Booking end time is after slot start time.
+                return Carbon::parse($booking->start_time)->lt($slotEnd) && 
+                       Carbon::parse($booking->end_time)->gt($slotStart);
+            })->count();
+
+            // A slot is available if its capacity hasn't been reached and it's not in the past
+            $isAvailable = $isFuture && ($currentBookings < $facility->capacity);
+
+            $slots[] = [
+                'start_time' => $slotStart->format('H:i:s'),
+                'end_time' => $slotEnd->format('H:i:s'),
+                'label' => $slotStart->format('g:i A') . ' - ' . $slotEnd->format('g:i A'),
+                'is_available' => $isAvailable,
+                'current_bookings' => $currentBookings,
+            ];
+
+            // Move to the start of the next 1-hour slot
+            $current->addHour();
         }
 
         return $slots;

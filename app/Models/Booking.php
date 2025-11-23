@@ -14,20 +14,24 @@ class Booking extends Model
         'user_id',
         'facility_id',
         'booking_date',
-        'start_time',
-        'end_time',
-        'status',
+        'start_time', // Time stored as 'H:i:s' string
+        'end_time',   // Time stored as 'H:i:s' string
         'notes',
-    ];
-
-    protected $casts = [
-        'booking_date' => 'date',
-        // Note: start_time and end_time are best treated as strings/timestamps 
-        // in Laravel to simplify database interactions.
+        'status',
     ];
 
     /**
-     * Get the user (student) who owns the booking.
+     * Prevent Laravel from automatically casting time columns to Carbon objects.
+     * We need them as clean strings ('17:00:00') for manual concatenation.
+     */
+    protected $casts = [
+        'booking_date' => 'date',
+        'start_time' => 'string', // Ensure this is treated as a simple string
+        'end_time' => 'string',   // Ensure this is treated as a simple string
+    ];
+
+    /**
+     * Relationship to the user who made the booking.
      */
     public function user(): BelongsTo
     {
@@ -35,7 +39,7 @@ class Booking extends Model
     }
 
     /**
-     * Get the facility that was booked.
+     * Relationship to the facility being booked.
      */
     public function facility(): BelongsTo
     {

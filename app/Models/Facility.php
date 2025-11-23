@@ -11,16 +11,29 @@ class Facility extends Model
 
     /**
      * The attributes that are mass assignable.
-     * These must match the columns in your 'facilities' migration.
-     * Note: 'id' and 'timestamps' are protected by default.
+     *
+     * We must explicitly add 'type' and 'status' to the fillable array
+     * to allow them to be saved when using Facility::create($request->all()).
      *
      * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'description',
-        'type',
         'capacity',
-        'status', // Allows staff to set the initial status
+        'type',         // <-- FIX 1: Added 'type' to resolve the NOT NULL error
+        'status',       // <-- FIX 2: Added 'status' to match the data sent from the form
+        'is_available', // Kept for legacy/other functionality, but 'status' is now primary
+        'opening_time',
+        'closing_time',
     ];
+
+    /**
+     * Get the bookings associated with the facility.
+     */
+    public function bookings()
+    {
+        // A Facility can have many Bookings
+        return $this->hasMany(Booking::class);
+    }
 }

@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('feedback', function (Blueprint $table) {
             $table->id();
+            // Link the feedback to the authenticated user
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            
+            // Subject of the feedback (e.g., 'discussion', 'center', 'other')
+            $table->string('subject'); 
+            
+            // Rating from 1 to 5
+            $table->unsignedTinyInteger('rating')->default(0); 
+
+            // The main feedback message
+            $table->text('message'); 
+            
             $table->timestamps();
         });
     }

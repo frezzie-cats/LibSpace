@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }} | Staff Panel</title>
+    <title>{{ config('app.name', 'LibSpace') }} | Student</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -15,42 +15,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJ6T90BaeT0Y72zO6F/8I9p0+O/oBv4e4f1k81t/Q3fGq23p8vW2eA/vK8nBqg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <!-- Scripts (Vite handles CSS and main app JS, including Alpine.js) -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js']) 
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-gray-50">
 
-    <!-- Overall container: Added overflow-x-hidden to prevent horizontal scrolling on the page -->
-    <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-100 overflow-x-hidden">
+    <!-- Overall container: Alpine state for sidebar visibility and overflow fix -->
+    <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-50 overflow-x-hidden">
         
-        <!-- 1. Fixed Top Navigation Bar (Always h-16, bg-gray-800) -->
-        <nav class="bg-gray-800 border-b border-gray-700 shadow-lg fixed top-0 w-full z-50 h-16">
+        <!-- 1. Fixed Top Navigation Bar (MSU Green: #18453b) -->
+        {{-- Custom hex color applied directly --}}
+        <nav class="bg-[#18453b] border-b border-[#0d2a23] shadow-lg fixed top-0 w-full z-50 h-16">
             <div class="max-w-full mx-auto h-full flex justify-between">
                 
                 <!-- Left Section: Logo and Hamburger -->
-                <div class="flex items-center bg-gray-800 px-4 sm:px-6 lg:w-64 lg:justify-center">
+                <div class="flex items-center bg-[#18453b] px-4 sm:px-6 lg:w-64 lg:justify-center">
                     <!-- Hamburger Button (Mobile only) -->
-                    <button @click="sidebarOpen = ! sidebarOpen" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white transition duration-150 ease-in-out lg:hidden mr-4">
+                    <button @click="sidebarOpen = ! sidebarOpen" class="inline-flex items-center justify-center p-2 rounded-md text-green-300 hover:text-white hover:bg-[#2a6858] focus:outline-none focus:bg-[#2a6858] focus:text-white transition duration-150 ease-in-out lg:hidden mr-4">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path :class="{'hidden': sidebarOpen, 'inline-flex': ! sidebarOpen }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                             <path :class="{'hidden': ! sidebarOpen, 'inline-flex': sidebarOpen }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
 
-                    <!-- Logo (This element will be centered on desktop screens) -->
+                    <!-- Logo (White Text, Vibrant Green Badge) -->
                     <div class="shrink-0 flex items-center">
-                        <a href="{{ route('staff.dashboard') }}" class="text-white text-xl font-bold tracking-wider">
-                            LibSpace <span class="bg-blue-600 text-xs text-white px-2 py-0.5 rounded-full ml-1">Staff</span>
+                        <a href="{{ url('/') }}" class="text-white text-xl font-bold tracking-wider">
+                            LibSpace <span class="bg-green-500 text-xs text-white px-2 py-0.5 rounded-full ml-1">Student</span>
                         </a>
                     </div>
                 </div>
                 
-                <!-- Right Section: User Settings Dropdown (Pushed to the remaining right space) -->
+                <!-- Right Section: User Settings Dropdown -->
                 <div class="flex items-center px-4 sm:px-6 lg:px-8">
                     <div class="ml-3 relative">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
-                                <button class="flex items-center text-sm font-medium text-gray-400 hover:text-white hover:border-gray-300 focus:outline-none focus:text-white focus:border-gray-300 transition duration-150 ease-in-out">
-                                    <i class="fas fa-user-circle mr-2"></i> 
+                                {{-- Text colors are light for high contrast against the dark green top bar --}}
+                                <button class="flex items-center text-sm font-medium text-green-300 hover:text-white hover:border-[#2a6858] focus:outline-none focus:text-white focus:border-[#2a6858] transition duration-150 ease-in-out">
+                                    <i class="fas fa-user-circle mr-2 text-lg"></i> 
                                     <div>{{ Auth::user()->name }}</div>
                                     <div class="ml-1">
                                         <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -79,52 +81,50 @@
             </div>
         </nav>
 
-        <!-- 2. Fixed Sidebar (Mobile drawer + Desktop lock) -->
+        <!-- 2. Fixed Sidebar (MSU Green: #18453b) -->
         <div x-cloak
              x-bind:class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }"
              @click.away="sidebarOpen = false"
              
-             {{-- Shared mobile/desktop classes --}}
-             class="fixed left-0 z-40 w-3/4 max-w-xs bg-gray-900 overflow-y-auto transition transform ease-in-out duration-300 -translate-x-full 
+             {{-- Custom hex color applied directly --}}
+             class="fixed left-0 z-40 w-3/4 max-w-xs bg-[#18453b] border-r border-[#0d2a23] overflow-y-auto transition transform ease-in-out duration-300 -translate-x-full 
                     
-                    {{-- MOBILE: Full height from top to bottom, offset by top bar (pt-16) --}}
+                    {{-- Shared mobile/desktop classes --}}
                     inset-y-0 pt-16 
                     
-                    {{-- DESKTOP FIX: Fixed from top-16 (below navbar) to bottom-0 (full height) and full width --}}
+                    {{-- DESKTOP FIX --}}
                     lg:fixed lg:top-16 lg:bottom-0 lg:w-64 lg:translate-x-0 lg:block">
 
-            <div class="p-4 pt-4 lg:pt-2"> 
-                <p class="text-xs uppercase text-gray-400 font-semibold mb-4 tracking-wider">Management</p>
+            <div class="p-4 pt-2"> 
+                {{-- Updated text color for dark background --}}
+                <p class="text-xs uppercase text-green-300 font-semibold mb-4 tracking-wider">Navigation</p>
 
                 <!-- Primary Sidebar Links -->
                 <nav class="space-y-2">
-                    <x-sidebar-link :href="route('staff.dashboard')" :active="request()->routeIs('staff.dashboard')">
-                        <i class="fas fa-tachometer-alt mr-3 w-5"></i> Dashboard
+                    {{-- NOTE: Your custom x-sidebar-link component should be styled for this dark background.
+                         RECOMMENDED STYLES FOR x-sidebar-link:
+                         - Inactive/Default: text-green-100 hover:bg-[#2a6858]
+                         - Active/Current Page: bg-green-500 text-white font-semibold --}}
+                    <x-sidebar-link :href="route('student.facilities.index')" :active="request()->routeIs('student.facilities.index')">
+                        <i class="fas fa-search mr-3 w-5"></i> Find Facilities
                     </x-sidebar-link>
-                    <x-sidebar-link :href="route('staff.facilities.index')" :active="request()->routeIs('staff.facilities.*')">
-                        <i class="fas fa-warehouse mr-3 w-5"></i> Facilities
+                    <x-sidebar-link :href="route('student.bookings.index')" :active="request()->routeIs('student.bookings.index')">
+                        <i class="fas fa-calendar-alt mr-3 w-5"></i> My Bookings
                     </x-sidebar-link>
-                    <x-sidebar-link :href="route('staff.bookings.index')" :active="request()->routeIs('staff.bookings.*')">
-                        <i class="fas fa-calendar-check mr-3 w-5"></i> Booking Overview
-                    </x-sidebar-link>
-                    <x-sidebar-link href="#">
-                        <i class="fas fa-users mr-3 w-5"></i> User Accounts
-                    </x-sidebar-link>
-                    <x-sidebar-link href="#">
-                        <i class="fas fa-chart-line mr-3 w-5"></i> Reports
-                    </x-sidebar-link>
+                    <x-nav-link :href="route('student.feedbacks.index')" :active="request()->routeIs('student.feedback.index')">
+                                Give Feedback
+                    </x-nav-link>
                 </nav>
             </div>
         </div>
         
-        <!-- Mobile Overlay Background (Optional, but good practice) -->
+        <!-- Mobile Overlay Background -->
         <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-30 bg-black opacity-50 lg:hidden" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-50" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-50" x-transition:leave-end="opacity-0"></div>
 
         <!-- 3. Main Content Area -->
-        {{-- FIX: Removed w-full and added lg:w-[calc(100%-16rem)] to ensure the width exactly fills the remaining space after the sidebar offset (ml-64 = 16rem) --}}
         <main class="mt-16 p-4 sm:p-6 lg:p-8 lg:ml-64 lg:w-[calc(100%-16rem)]">
             
-            <!-- Session Status / Success Messages -->
+            <!-- Session Status / Success Messages (Standard Green/Red for alerts) -->
             @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
                     <span class="block sm:inline">{{ session('success') }}</span>
@@ -139,7 +139,6 @@
             <!-- Content Slot for specific views -->
             @yield('content')
         </main>
-        
     </div>
 </body>
 </html>

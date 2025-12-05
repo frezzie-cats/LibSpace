@@ -11,17 +11,17 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,600&display=swap" rel="stylesheet" />
 
-    <!-- Font Awesome CDN (for icons) -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> 
-
+    <!-- Font Awesome CDN (FIXED: Using reliable CSS link) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJ6T90BaeT0Y72zO6F/8I9p0+O/oBv4e4f1k81t/Q3fGq23p8vW2eA/vK8nBqg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
     <!-- Scripts (Vite handles CSS and main app JS, including Alpine.js) -->
     @vite(['resources/css/app.css', 'resources/js/app.js']) 
 </head>
 <body class="font-sans antialiased bg-gray-50">
 
     <div class="min-h-screen bg-gray-50">
-        <!-- Student Navigation Bar -->
-        <nav x-data="{ open: false, dropdownOpen: false }" class="bg-white border-b border-gray-100 shadow-sm">
+        <!-- Student Navigation Bar (Dark Green: #00563f) -->
+        <nav x-data="{ open: false, dropdownOpen: false }" class="bg-[#00563f] border-b border-[#003928] shadow-sm">
             
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
@@ -29,20 +29,21 @@
                     <div class="flex">
                         <!-- Logo -->
                         <div class="shrink-0 flex items-center">
-                            <a href="{{ url('/') }}" class="text-gray-800 text-xl font-bold tracking-wider">
+                            <a href="{{ url('/') }}" class="text-white text-xl font-bold tracking-wider">
                                 LibSpace <span class="bg-green-500 text-xs text-white px-2 py-0.5 rounded-full ml-1">Student</span>
                             </a>
                         </div>
                         
                         <!-- Navigation Links (Desktop) -->
                         <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                            <x-nav-link :href="route('student.facilities.index')" :active="request()->routeIs('student.facilities.index')">
+                            {{-- Use theme="student" to apply green colors --}}
+                            <x-nav-link :href="route('student.facilities.index')" :active="request()->routeIs('student.facilities.index')" theme="student">
                                 Find Facilities
                             </x-nav-link>
-                            <x-nav-link :href="route('student.bookings.index')" :active="request()->routeIs('student.bookings.index')">
+                            <x-nav-link :href="route('student.bookings.index')" :active="request()->routeIs('student.bookings.index')" theme="student">
                                 My Bookings
                             </x-nav-link>
-                            <x-nav-link :href="route('student.feedbacks.index')" :active="request()->routeIs('student.feedback.index')">
+                            <x-nav-link :href="route('student.feedbacks.index')" :active="request()->routeIs('student.feedback.index')" theme="student">
                                 Give Feedback
                             </x-nav-link>
                         </div>
@@ -51,7 +52,7 @@
                     <!-- Settings Dropdown (Desktop) -->
                     <div class="hidden sm:flex sm:items-center sm:ml-6">
                         <div class="ml-3 relative">
-                            <button @click="dropdownOpen = ! dropdownOpen" class="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
+                            <button @click="dropdownOpen = ! dropdownOpen" class="flex items-center text-sm font-medium text-green-300 hover:text-white hover:border-green-300 focus:outline-none focus:text-white focus:border-green-300 transition duration-150 ease-in-out">
                                 <i class="fas fa-user-circle mr-2 text-lg"></i> 
                                 <div>{{ Auth::user()->name }}</div>
                                 <div class="ml-1">
@@ -61,7 +62,7 @@
                                 </div>
                             </button>
                             
-                            <!-- Dropdown Content -->
+                            <!-- Dropdown Content (standard white background) -->
                             <div 
                                 x-show="dropdownOpen"
                                 @click.outside="dropdownOpen = false"
@@ -93,7 +94,7 @@
 
                     <!-- Hamburger -->
                     <div class="-mr-2 flex items-center sm:hidden">
-                        <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                        <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-green-300 hover:text-white hover:bg-[#007452] focus:outline-none focus:bg-[#007452] focus:text-white transition duration-150 ease-in-out">
                             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                 <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                                 <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -107,26 +108,27 @@
             <!-- Responsive Navigation Menu (Mobile) -->
             <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
                 <div class="pt-2 pb-3 space-y-1">
-                    <x-responsive-nav-link :href="route('student.facilities.index')" :active="request()->routeIs('student.facilities.index')">
+                    {{-- Responsive links also need the theme prop --}}
+                    <x-responsive-nav-link :href="route('student.facilities.index')" :active="request()->routeIs('student.facilities.index')" theme="student">
                         Find Facilities
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('student.bookings.index')" :active="request()->routeIs('student.bookings.index')">
+                    <x-responsive-nav-link :href="route('student.bookings.index')" :active="request()->routeIs('student.bookings.index')" theme="student">
                         My Bookings
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('student.feedbacks.index')" :active="request()->routeIs('student.feedback.index')">
+                    <x-responsive-nav-link :href="route('student.feedbacks.index')" :active="request()->routeIs('student.feedback.index')" theme="student">
                         Give Feedback
                     </x-responsive-nav-link>
                 </div>
 
                 <!-- Responsive Settings Options -->
-                <div class="pt-4 pb-1 border-t border-gray-200">
+                <div class="pt-4 pb-1 border-t border-gray-200 bg-[#004230]">
                     <div class="px-4">
-                        <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                        <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                        <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
+                        <div class="font-medium text-sm text-green-300">{{ Auth::user()->email }}</div>
                     </div>
 
                     <div class="mt-3 space-y-1">
-                        <x-responsive-nav-link :href="route('profile.edit')">
+                        <x-responsive-nav-link :href="route('profile.edit')" theme="student">
                             Profile
                         </x-responsive-nav-link>
 
@@ -135,8 +137,8 @@
                             @csrf
                             <x-responsive-nav-link :href="route('logout')"
                                     onclick="event.preventDefault();
-                                                this.closest('form').submit();"
-                                    class="text-red-500 hover:text-red-300">
+                                             this.closest('form').submit();"
+                                    class="text-red-400 hover:text-red-200">
                                 Log Out
                             </x-responsive-nav-link>
                         </form>
@@ -147,7 +149,7 @@
 
         <!-- Main Student Content Area -->
         <main class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Session Status / Success Messages -->
+            <!-- Session Status / Success Messages (Standard Green/Red for alerts) -->
             @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
                     <span class="block sm:inline">{{ session('success') }}</span>

@@ -17,7 +17,7 @@ class BookingController extends Controller
 {
     // --- CONSTRAINTS (Match FacilityController logic) ---
     private $fixedOpeningTime = '08:00:00';
-    private $fixedClosingTime = '23:00:00'; // TEMPORARILY EXTENDED FOR TESTING
+    private $fixedClosingTime = '18:00:00'; 
     // ---------------------------------------------------
 
     /**

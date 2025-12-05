@@ -15,8 +15,9 @@ class FacilityController extends Controller
      */
     public function index()
     {
-        // Fetch all facilities, ordered by name, for the index view (listing)
-        $facilities = Facility::orderBy('name')->get();
+        // Fetch all facilities, ordered by creation date in ASCENDING order.
+        // This ensures the oldest facility is at the top, and the latest added is at the bottom.
+        $facilities = Facility::orderBy('created_at', 'asc')->get();
         return view('staff.facilities.index', compact('facilities'));
     }
 
@@ -39,9 +40,8 @@ class FacilityController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:facilities,name',
             'description' => 'nullable|string',
-            // --- FIX START: Use Rule::in to restrict 'type' to the exact values expected by the database/form. ---
-            'type' => ['required', 'string', Rule::in(['room', 'pad', 'equipment'])],
-            // --- FIX END ---
+            // Facility types are now restricted to 'room' and 'pad' only.
+            'type' => ['required', 'string', Rule::in(['room', 'pad'])],
             'capacity' => 'required|integer|min:1',
             // Ensure status is one of the allowed values
             'status' => ['required', Rule::in(['available', 'not available', 'under maintenance'])],
@@ -76,9 +76,8 @@ class FacilityController extends Controller
             // Rule::unique ignores the current facility's ID
             'name' => ['required', 'string', 'max:255', Rule::unique('facilities')->ignore($facility->id)],
             'description' => 'nullable|string',
-            // --- FIX START: Use Rule::in to restrict 'type' to the exact values expected by the database/form. ---
-            'type' => ['required', 'string', Rule::in(['room', 'pad', 'equipment'])],
-            // --- FIX END ---
+            // Facility types are now restricted to 'room' and 'pad' only.
+            'type' => ['required', 'string', Rule::in(['room', 'pad'])],
             'capacity' => 'required|integer|min:1',
             // Crucially, this allows staff to update the status
             'status' => ['required', Rule::in(['available', 'not available', 'under maintenance'])],

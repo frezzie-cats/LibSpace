@@ -12,24 +12,35 @@ class BookingManagementController extends Controller
 {
     /**
      * Display a list of all bookings across the system.
-     * Staff view shows current and future bookings prominently.
+     * Staff view shows current and future bookings prominently in one 'Active' category.
      */
     public function index(): View
     {
+        $todayDate = Carbon::today()->toDateString();
+
         // Fetch all bookings. Eager load the related user (student) and facility.
-        $bookings = Booking::with(['user', 'facility'])
-                        ->orderBy('booking_date', 'desc')
-                        ->orderBy('start_time', 'desc')
-                        ->get();
+        // It's generally more efficient to use database queries (where) before collecting (get)
+        // rather than fetching all and filtering in PHP (Collection filter).
 
-        // Categorize bookings for display
-        $todayBookings = $bookings->filter(fn ($b) => $b->booking_date === Carbon::today()->toDateString());
-        $upcomingBookings = $bookings->filter(fn ($b) => $b->booking_date > Carbon::today()->toDateString());
-        $pastBookings = $bookings->filter(fn ($b) => $b->booking_date < Carbon::today()->toDateString());
+        // Fetch ACTIVE Bookings (Today or Future)
+        $activeBookings = Booking::with(['user', 'facility'])
+            // Filter to include all bookings on or after the current day
+            ->where('booking_date', '>=', $todayDate) 
+            ->orderBy('booking_date', 'asc') // Upcoming first
+            ->orderBy('start_time', 'asc')
+            ->get();
 
+        // Fetch PAST Bookings
+        $pastBookings = Booking::with(['user', 'facility'])
+            // Filter to include all bookings before the current day
+            ->where('booking_date', '<', $todayDate)
+            ->orderBy('booking_date', 'desc') // Recent past first
+            ->orderBy('start_time', 'desc')
+            ->get();
+
+        // We now only pass 'activeBookings' (Today + Upcoming) and 'pastBookings'
         return view('staff.bookings.index', compact(
-            'todayBookings',
-            'upcomingBookings',
+            'activeBookings',
             'pastBookings'
         ));
     }

@@ -6,10 +6,12 @@
         // Dark Green Theme: White/Light Green text on dark background (#00563f)
         $baseText = 'text-green-300';
         $baseBorder = 'border-transparent';
-        $baseHover = 'hover:text-white hover:border-green-300';
+        $baseHover = 'hover:text-white hover:border-white'; 
         
         $activeText = 'text-white';
         $activeBorder = 'border-white';
+        $focusBorder = 'focus:border-white';
+        
     } else {
         // Default (Staff) Theme: White background with blue accent (standard Laravel/Jetstream colors)
         $baseText = 'text-gray-500';
@@ -18,12 +20,17 @@
         
         $activeText = 'text-gray-900';
         $activeBorder = 'border-indigo-400';
+        $focusBorder = 'focus:border-indigo-700';
     }
     
     // --- Apply Classes ---
+    // IMPORTANT CHANGE: Keeping py-4 for vertical positioning, but reducing horizontal padding to px-2 
+    // to make the border length closer to the word length.
+    $commonClasses = 'inline-flex items-center px-2 py-4 border-b-2 text-sm font-medium focus:outline-none transition duration-150 ease-in-out';
+
     $classes = ($active ?? false)
-                ? "inline-flex items-center px-1 pt-1 border-b-2 {$activeBorder} text-sm font-medium leading-5 {$activeText} focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out"
-                : "inline-flex items-center px-1 pt-1 border-b-2 {$baseBorder} text-sm font-medium leading-5 {$baseText} {$baseHover} focus:outline-none focus:border-gray-300 transition duration-150 ease-in-out";
+                ? "{$commonClasses} {$activeBorder} {$activeText} {$focusBorder}"
+                : "{$commonClasses} {$baseBorder} {$baseText} {$baseHover} {$focusBorder}";
 @endphp
 
 <a {{ $attributes->merge(['href' => $href, 'class' => $classes]) }}>

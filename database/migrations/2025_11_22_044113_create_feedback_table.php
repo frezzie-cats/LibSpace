@@ -25,6 +25,11 @@ return new class extends Migration
             // The main feedback message
             $table->text('message'); 
             
+            // NEW COLUMN: Status for staff review and management
+            // Restricts the value to a predefined set and defaults to 'new'.
+            $table->enum('status', ['new', 'reviewed', 'resolved', 'ignored'])
+                  ->default('new'); 
+            
             $table->timestamps();
         });
     }

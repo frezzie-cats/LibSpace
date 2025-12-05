@@ -2,11 +2,12 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\FacilityController as StaffFacilityController;
-use App\Http\Controllers\Staff\BookingManagementController; // <-- NEW IMPORT
+use App\Http\Controllers\Staff\BookingManagementController;
+use App\Http\Controllers\Staff\FeedbackController as StaffFeedbackController;
 use App\Http\Controllers\Student\FacilityController as StudentFacilityController;
 use App\Http\Controllers\Student\BookingController;
+use App\Http\Controllers\Student\FeedbackController;
 use App\Models\User;
-use App\Http\Controllers\Student\FeedbackController; // NEW IMPORT
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -62,10 +63,21 @@ Route::middleware(['auth', 'role:' . User::ROLE_STAFF])->prefix('staff')->name('
     Route::resource('facilities', StaffFacilityController::class)->except(['show']);
     
     // ----------------------------------------------------
-    // Booking Overview and Management (NEW)
+    // Booking Overview and Management
     // ----------------------------------------------------
     Route::get('bookings', [BookingManagementController::class, 'index'])->name('bookings.index');
     Route::get('bookings/{booking}', [BookingManagementController::class, 'show'])->name('bookings.show');
+
+    // ----------------------------------------------------
+    // Facility Feedback Review and Management (NEW)
+    // ----------------------------------------------------
+    Route::prefix('feedbacks')->name('feedbacks.')->controller(StaffFeedbackController::class)->group(function () {
+        // GET /staff/feedbacks (Dashboard view of all feedback)
+        Route::get('/', 'index')->name('index');
+        
+        // PATCH /staff/feedbacks/{feedback} (Update status via dropdown)
+        Route::patch('/{feedback}', 'updateStatus')->name('update_status');
+    });
 });
 
 
@@ -86,7 +98,7 @@ Route::middleware(['auth', 'role:' . User::ROLE_STUDENT])->prefix('student')->na
     Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::delete('bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
 
-    
+    // 3. Student Feedback Submission
     Route::get('feedbacks', [FeedbackController::class, 'index'])->name('feedbacks.index');
     Route::post('feedbacks', [FeedbackController::class, 'store'])->name('feedbacks.store');
 

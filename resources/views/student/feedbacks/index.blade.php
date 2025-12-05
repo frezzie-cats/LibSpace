@@ -129,8 +129,8 @@
 
         {{-- Additional Info --}}
         <div class="mt-8 text-center">
-            <p class="text-sm text-gray-500">
-                Thank Avail you for helping us improve!
+            <p class="text-sm text-gray-600">
+                Thank you for helping us improve!
             </p>
         </div>
     </div>

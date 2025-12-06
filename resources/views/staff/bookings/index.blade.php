@@ -53,7 +53,7 @@
         <div x-show="activeTab === 'active'">
             @if($activeBookings->isEmpty())
                 <div class="p-4 bg-blue-50 rounded-lg text-blue-700 border border-blue-200 italic">
-                    No active bookings currently scheduled (Today or Future).
+                    No active bookings currently scheduled.
                 </div>
             @else
                 {{-- Includes the table partial, passing the combined collection --}}

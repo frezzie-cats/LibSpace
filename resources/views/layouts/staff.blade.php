@@ -86,12 +86,12 @@
              
              {{-- Shared mobile/desktop classes --}}
              class="fixed left-0 z-40 w-3/4 max-w-xs bg-gray-900 overflow-y-auto transition transform ease-in-out duration-300 -translate-x-full 
-                    
-                    {{-- MOBILE: Full height from top to bottom, offset by top bar (pt-16) --}}
-                    inset-y-0 pt-16 
-                    
-                    {{-- DESKTOP FIX: Fixed from top-16 (below navbar) to bottom-0 (full height) and full width --}}
-                    lg:fixed lg:top-16 lg:bottom-0 lg:w-64 lg:translate-x-0 lg:block">
+                     
+                     {{-- MOBILE: Full height from top to bottom, offset by top bar (pt-16) --}}
+                     inset-y-0 pt-16 
+                     
+                     {{-- DESKTOP FIX: Fixed from top-16 (below navbar) to bottom-0 (full height) and full width --}}
+                     lg:fixed lg:top-16 lg:bottom-0 lg:w-64 lg:translate-x-0 lg:block">
 
             <div class="p-4 pt-4 lg:pt-2"> 
                 <p class="text-xs uppercase text-gray-400 font-semibold mb-4 tracking-wider">Management</p>
@@ -107,12 +107,18 @@
                     <x-sidebar-link :href="route('staff.bookings.index')" :active="request()->routeIs('staff.bookings.*')">
                         <i class="fas fa-calendar-check mr-3 w-5"></i> Booking Overview
                     </x-sidebar-link>
-                    <x-sidebar-link href="#">
+                    
+                    {{-- NEW: Feedback Review Link --}}
+                    <x-sidebar-link :href="route('staff.feedbacks.index')" :active="request()->routeIs('staff.feedbacks.*')">
+                        <i class="fas fa-comments mr-3 w-5"></i> Feedback Review
+                    </x-sidebar-link>
+                    
+                    <!-- <x-sidebar-link href="#">
                         <i class="fas fa-users mr-3 w-5"></i> User Accounts
                     </x-sidebar-link>
                     <x-sidebar-link href="#">
                         <i class="fas fa-chart-line mr-3 w-5"></i> Reports
-                    </x-sidebar-link>
+                    </x-sidebar-link> -->
                 </nav>
             </div>
         </div>

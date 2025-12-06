@@ -9,8 +9,6 @@ class Feedback extends Model
 {
     use HasFactory;
 
-    // By default, Laravel looks for the plural form (feedbacks). 
-    // We explicitly set the table name to 'feedback' as per the migration.
     protected $table = 'feedback'; 
 
     protected $fillable = [
@@ -18,14 +16,29 @@ class Feedback extends Model
         'subject',
         'rating',
         'message',
+        'status',
+    ];
+
+    protected $attributes = [
+        'status' => 'new',
     ];
 
     /**
-     * Get the user that submitted the feedback.
+     * Get the user (student) that submitted the feedback.
+     * We use a generic 'user' relationship since 'user_id' links to the User model.
      */
     public function user()
     {
-        // Assuming the User model is in the default App\Models namespace
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the student (alias for user) that submitted the feedback.
+     * This relationship exists solely to support the code "Feedback::with('student')"
+     * used in the Staff\FeedbackController for better readability.
+     */
+    public function student()
+    {
+        return $this->user();
     }
 }

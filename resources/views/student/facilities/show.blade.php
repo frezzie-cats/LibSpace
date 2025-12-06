@@ -1,149 +1,237 @@
-@extends('layouts.student')
+<!-- 
+    NOTE: This assumes the following variables are passed from the controller:
+    $facility: The Facility model instance.
+    $bookings: A collection of existing bookings for the selected date (filtered by facility and date).
+    $today: The current date string ('Y-m-d').
+-->
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Book: {{ $facility->name }}
+        </h2>
+    </x-slot>
 
-@section('title', 'Book ' . $facility->name)
+    <div class="py-12">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <!-- Facility Card -->
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-8 border-t-4 border-indigo-500">
+                <h3 class="text-2xl font-bold mb-2 text-indigo-700">{{ $facility->name }}</h3>
+                <p class="text-gray-600 mb-1">Type: {{ ucfirst($facility->type) }}</p>
+                <p class="text-gray-600 mb-1">Capacity: {{ $facility->capacity }} simultaneous bookings</p>
+                <p class="text-gray-600 mb-4">Status: <span class="{{ $facility->status === 'available' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">{{ ucfirst($facility->status) }}</span></p>
+                
+                @if ($facility->status !== 'available')
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                        <p class="font-bold">Unavailable</p>
+                        <p>This facility cannot be booked at the moment.</p>
+                    </div>
+                @endif
+                
+                <p class="text-sm text-gray-500 mt-4">
+                    Booking is strictly for **today ({{ \Carbon\Carbon::parse($today)->format('F d, Y') }})** only, between 8:00 AM and 6:00 PM.
+                </p>
+            </div>
 
-@section('content')
-<div class="max-w-4xl mx-auto p-6 space-y-8">
-    <div class="flex justify-between items-center pb-4 border-b border-gray-200">
-        <h1 class="text-3xl font-bold text-gray-800">{{ $facility->name }}</h1>
-        <a href="{{ route('student.facilities.index') }}" class="text-indigo-600 hover:text-indigo-800 transition duration-150 flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Back to Facilities
-        </a>
-    </div>
+            <h3 class="text-xl font-semibold mb-4 text-gray-700">Available Time Slots (Today)</h3>
+            
+            <!-- Clarification for the user -->
+            <p class="text-sm text-yellow-600 bg-yellow-100 p-3 rounded-lg mb-6 border-l-4 border-yellow-500">
+                ⚠️ **Note on Slot Status:** Slots are marked as 'Passed' if the current server time is after the slot's start time (e.g., if it's 10:30 AM, the 9:00 AM slot is 'Passed'). 
+                Slots are marked 'Full' if the number of overlapping, confirmed bookings reaches the facility's capacity ({{ $facility->capacity }}).
+            </p>
 
-    <!-- Facility Description and Details -->
-    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-        <p class="text-gray-600 mb-4">{{ $facility->description }}</p>
-        <div class="grid grid-cols-2 gap-4 text-sm">
-            <div><span class="font-semibold text-gray-700">Type:</span> {{ ucfirst($facility->type) }}</div>
-            <div><span class="font-semibold text-gray-700">Capacity:</span> {{ $facility->capacity }} people</div>
-            <div><span class="font-semibold text-gray-700">Fixed Hours:</span> 8:00 AM - 6:00 PM</div>
-            <div><span class="font-semibold text-gray-700">Duration:</span> 1 Hour (Fixed)</div>
+            <!-- Time Slot Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="time-slot-grid">
+                @php
+                    // Define the fixed opening and closing times
+                    $opening = \Carbon\Carbon::createFromTimeString('08:00');
+                    $closing = \Carbon\Carbon::createFromTimeString('18:00');
+                    // Interval is 60 minutes (1 hour)
+                    $interval = 60; 
+                    $currentTime = \Carbon\Carbon::now();
+                @endphp
+
+                @while ($opening->lessThan($closing))
+                    @php
+                        $slotStart = $opening->copy();
+                        $slotEnd = $opening->copy()->addMinutes($interval);
+                        
+                        // Stop if the next slot exceeds the closing time (18:00)
+                        if ($slotEnd->greaterThan($closing)) {
+                            break;
+                        }
+
+                        $timeDisplay = $slotStart->format('g:i A') . ' - ' . $slotEnd->format('g:i A');
+                        
+                        // 1. Check if the slot is in the past
+                        $isPast = $slotStart->lessThan($currentTime);
+
+                        // 2. Check Capacity (only if the facility is available and the slot is not passed)
+                        $isFullyBooked = false;
+                        if ($facility->status === 'available' && !$isPast) {
+                            $overlappingBookings = \App\Models\Booking::where('facility_id', $facility->id)
+                                ->where('booking_date', $today)
+                                ->where('status', 'confirmed')
+                                ->where(function ($query) use ($slotStart, $slotEnd) {
+                                    // Overlap condition: existing_start < new_end AND existing_end > new_start
+                                    $query->where('start_time', '<', $slotEnd->format('H:i:s'))
+                                        ->where('end_time', '>', $slotStart->format('H:i:s'));
+                                })
+                                ->count();
+                            
+                            if ($overlappingBookings >= $facility->capacity) {
+                                $isFullyBooked = true;
+                            }
+                        }
+                        
+                        // 3. Determine Final Status and Class
+                        $buttonClass = 'bg-gray-200 text-gray-500 cursor-not-allowed';
+                        $statusText = 'Unavailable';
+
+                        if ($facility->status === 'available') {
+                            if ($isPast) {
+                                $buttonClass = 'bg-gray-100 text-gray-400 cursor-not-allowed';
+                                $statusText = 'Passed';
+                            } elseif ($isFullyBooked) {
+                                $buttonClass = 'bg-red-500 text-white cursor-not-allowed hover:bg-red-600';
+                                $statusText = 'Full';
+                            } else {
+                                $buttonClass = 'bg-green-500 text-white cursor-pointer hover:bg-green-600 transition duration-150 ease-in-out';
+                                $statusText = 'Available';
+                            }
+                        }
+
+                    @endphp
+
+                    <button 
+                        @if ($statusText === 'Available') 
+                            {{-- FIX: Using data-attributes to store values and a JS listener to attach behavior, avoiding inline JS quoting issues. --}}
+                            data-start-time="{{ $slotStart->format('H:i:s') }}"
+                            data-end-time="{{ $slotEnd->format('H:i:s') }}"
+                            data-time-display="{{ $timeDisplay }}"
+                            class="book-slot-btn {{ $buttonClass }}"
+                        @else
+                            disabled
+                            class="{{ $buttonClass }}"
+                        @endif
+                        class="p-4 rounded-lg shadow-md font-medium text-sm text-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 h-20 flex flex-col justify-center items-center"
+                    >
+                        <span class="text-base">{{ $slotStart->format('g:i A') }}</span>
+                        <span class="text-xs mt-1">{{ $statusText }}</span>
+                    </button>
+                    
+                    @php
+                        // Move to the next interval (60 minutes)
+                        $opening->addMinutes($interval);
+                    @endphp
+                @endwhile
+            </div>
+
+            <!-- Error/Success Messages -->
+            @if (session('success'))
+                <div class="mt-8 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded" role="alert">
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mt-8 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded" role="alert">
+                    {{ session('error') }}
+                </div>
+            @endif
         </div>
     </div>
 
-    <!-- Booking Interface -->
-    <div class="bg-white p-6 rounded-xl shadow-lg border border-indigo-100">
-        <h2 class="text-2xl font-semibold mb-4 text-indigo-700">Book Today: {{ \Carbon\Carbon::parse($bookingDate)->format('l, F jS') }}</h2>
-        <p class="text-sm text-gray-500 mb-6">Select an available 1-hour slot below. All bookings are strictly for today.</p>
+    <!-- Booking Modal Structure -->
+    <div id="booking-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center z-50 transition-opacity duration-300">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                Confirm Your Booking
+            </h3>
+            <div class="mt-2">
+                <p class="text-sm text-gray-500">
+                    You are booking **{{ $facility->name }}** for the slot: <span id="slot-display" class="font-semibold text-indigo-600"></span>.
+                </p>
 
-        @if(session('error'))
-            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
-                {{ session('error') }}
-            </div>
-        @endif
-        @if(session('success'))
-            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <form action="{{ route('student.bookings.store') }}" method="POST" class="space-y-6">
-            @csrf
-            
-            <!-- Hidden Fields (Date and Facility) -->
-            <input type="hidden" name="facility_id" value="{{ $facility->id }}">
-            <input type="hidden" name="booking_date" value="{{ $bookingDate }}">
-
-            <!-- 1. Start Time Selection -->
-            <div>
-                <label for="start_time" class="block text-sm font-medium text-gray-700">1. Select Start Time (1-Hour Slot)</label>
-                <select id="start_time" name="start_time" required 
-                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm">
-                    <option value="">-- Select a Time Slot --</option>
+                <form id="booking-form" method="POST" action="{{ route('student.bookings.store') }}" class="mt-4">
+                    @csrf
+                    <input type="hidden" name="facility_id" value="{{ $facility->id }}">
+                    <input type="hidden" name="booking_date" value="{{ $today }}">
+                    <input type="hidden" name="start_time" id="modal-start-time">
+                    <input type="hidden" name="end_time" id="modal-end-time">
                     
-                    @forelse ($availableSlots as $slot)
-                        @if ($slot['is_available'])
-                            <!-- Data attributes store the label and the calculated end time for JS/form submission -->
-                            <option value="{{ $slot['start_time'] }}" 
-                                    data-end-time="{{ $slot['end_time'] }}"
-                                    data-label="{{ $slot['label'] }}">
-                                {{ $slot['label'] }} ({{ $facility->capacity - $slot['current_bookings'] }} spots left)
-                            </option>
-                        @else
-                            <!-- Display unavailable slots, but make them unselectable/disabled -->
-                            <option value="{{ $slot['start_time'] }}" disabled class="bg-gray-100 text-gray-400">
-                                {{ $slot['label'] }} (Fully Booked or Past)
-                            </option>
-                        @endif
-                    @empty
-                        <option value="" disabled>No available slots remaining today.</option>
-                    @endforelse
-                    
-                </select>
-                @error('start_time')
-                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                    <div class="mb-4">
+                        <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+                        <textarea name="notes" id="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Purpose of booking, e.g., 'Group study session'"></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="close-modal-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-150">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition duration-150">
+                            Confirm Booking
+                        </button>
+                    </div>
+                </form>
             </div>
-            
-            <!-- HIDDEN END TIME FIELD (Set by JS) -->
-            <!-- This is crucial: the end time must be passed to the server for validation and storage -->
-            <input type="hidden" name="end_time" id="end_time" required>
-
-            <!-- Display confirmation text -->
-            <p id="confirmation_text" class="text-sm text-indigo-600 hidden p-3 border border-indigo-200 bg-indigo-50 rounded-md">
-                You will be booking the slot: <span class="font-bold" id="selected_slot_label"></span>.
-            </p>
-
-            <!-- 2. Notes (Optional) -->
-            <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700">2. Notes (Optional)</label>
-                <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"></textarea>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" id="submit_button" disabled class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 focus:outline-none transition duration-150">
-                Confirm Booking
-            </button>
-        </form>
+        </div>
     </div>
-</div>
 
-<!-- JavaScript for Setting End Time and Enabling Button -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const startTimeSelect = document.getElementById('start_time');
-        const endTimeInput = document.getElementById('end_time');
-        const submitButton = document.getElementById('submit_button');
-        const confirmationText = document.getElementById('confirmation_text');
-        const selectedSlotLabel = document.getElementById('selected_slot_label');
-
-        const updateBookingDetails = () => {
-            const selectedOption = startTimeSelect.options[startTimeSelect.selectedIndex];
-            
-            // Check if a valid, non-placeholder option is selected
-            if (selectedOption && selectedOption.value) {
-                const startTime = selectedOption.value;
-                const endTime = selectedOption.dataset.endTime;
-                const label = selectedOption.dataset.label;
-
-                // Set the hidden end time input for the server
-                endTimeInput.value = endTime;
-                
-                // Update confirmation message
-                selectedSlotLabel.textContent = label;
-                confirmationText.classList.remove('hidden');
-
-                // Enable the submit button and change style
-                submitButton.disabled = false;
-                submitButton.classList.remove('bg-gray-400');
-                submitButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'focus:ring-indigo-500');
-
+    <!-- JavaScript for Modal Handling and Event Listeners -->
+    <script>
+        // Helper function to show/hide the modal
+        function toggleModal(show) {
+            const modal = document.getElementById('booking-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
             } else {
-                // Reset fields and disable button
-                endTimeInput.value = '';
-                confirmationText.classList.add('hidden');
-                submitButton.disabled = true;
-                submitButton.classList.add('bg-gray-400');
-                submitButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'focus:ring-indigo-500');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             }
-        };
+        }
 
-        startTimeSelect.addEventListener('change', updateBookingDetails);
-        
-        // Initial run to handle page load state
-        updateBookingDetails();
-    });
-</script>
-@endsection
+        // The function called when a slot button is clicked
+        function showBookingModal(startTime, endTime, timeDisplay) {
+            // Update the form fields
+            document.getElementById('modal-start-time').value = startTime;
+            document.getElementById('modal-end-time').value = endTime;
+            document.getElementById('slot-display').textContent = timeDisplay;
+            
+            // Show the modal
+            toggleModal(true);
+        }
+
+        // Attach event listeners after the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Attach click handler to all available slot buttons
+            document.querySelectorAll('.book-slot-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const start = this.getAttribute('data-start-time');
+                    const end = this.getAttribute('data-end-time');
+                    const display = this.getAttribute('data-time-display');
+                    // Call the modal function using the values stored in data attributes
+                    showBookingModal(start, end, display);
+                });
+            });
+
+            // 2. Event listener for the Cancel button in the modal
+            document.getElementById('close-modal-btn').addEventListener('click', () => toggleModal(false));
+
+            // 3. Simple way to handle clicks outside the modal to close it
+            document.getElementById('booking-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    toggleModal(false);
+                }
+            });
+
+            // 4. Ensure the modal can close with ESC key
+            document.addEventListener('keydown', function(event) {
+                const modal = document.getElementById('booking-modal');
+                if (event.key === 'Escape' && modal.classList.contains('flex')) {
+                    toggleModal(false);
+                }
+            });
+        });
+    </script>
+</x-app-layout>

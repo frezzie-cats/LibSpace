@@ -7,7 +7,7 @@ use App\Http\Controllers\Controllers\Staff\FeedbackController as StaffFeedbackCo
 use App\Http\Controllers\Student\FacilityController as StudentFacilityController;
 use App\Http\Controllers\Student\BookingController;
 use App\Http\Controllers\Student\FeedbackController;
-use App\Http\Controllers\Student\StudentHomeController; // <--- ADDED: Import the dedicated Home Controller
+use App\Http\Controllers\Student\StudentHomeController; 
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -72,7 +72,7 @@ Route::middleware(['auth', 'role:' . User::ROLE_STAFF])->prefix('staff')->name('
     // ----------------------------------------------------
     // Facility Feedback Review and Management (NEW)
     // ----------------------------------------------------
-    Route::prefix('feedbacks')->name('feedbacks.')->controller(StaffFeedbackController::class)->group(function () {
+    Route::prefix('feedbacks')->name('feedbacks.')->controller(controller: StaffFeedbackController::class)->group(function () {
         // GET /staff/feedbacks (Dashboard view of all feedback)
         Route::get('/', 'index')->name('index');
         

@@ -38,10 +38,9 @@
                     name="type" 
                     required>
                     <option value="">Select a Type</option>
-                    <option value="room" {{ old('type') == 'room' ? 'selected' : '' }}>Discussion Room</option>
-                    <option value="pad" {{ old('type') == 'pad' ? 'selected' : '' }}>Nap Pad</option>
-                    {{-- UPDATED: Activity Center is now set to value="room" for consistency --}}
-                    <option value="room" {{ old('type') == 'room' ? 'selected' : '' }}>Activity Center</option>
+                    <option value="room" {{ old('type') == 'room' ? 'selected' : '' }}>Room</option>
+                    <option value="pad" {{ old('type') == 'pad' ? 'selected' : '' }}>Pad</option>
+                    <option value="venue" {{ old('type') == 'venue' ? 'selected' : '' }}>Venue</option>
                 </select>
                 @error('type')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

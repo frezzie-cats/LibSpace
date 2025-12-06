@@ -46,11 +46,13 @@ class BookingController extends Controller
         $today = Carbon::now()->format('Y-m-d');
 
         // 1. Validation
+        // FIX: Update date_format rule to accept both H:i:s AND H:i 
+        // to handle inconsistent input from the view and stop the validation error.
         $validatedData = $request->validate([
             'facility_id' => ['required', 'exists:facilities,id'],
             'booking_date' => ['required', 'date', Rule::in([$today])], 
-            'start_time' => ['required', 'date_format:H:i:s'],
-            'end_time' => ['required', 'date_format:H:i:s', 'after:start_time'],
+            'start_time' => ['required', 'date_format:H:i:s,H:i'],
+            'end_time' => ['required', 'date_format:H:i:s,H:i', 'after:start_time'],
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -62,7 +64,7 @@ class BookingController extends Controller
 
         // --- Prepare Carbon objects for checks ---
         try {
-            // Clean components: Parse raw input, format it cleanly.
+            // Clean components: Parse raw input (which could be H:i or H:i:s), and format it cleanly to H:i:s
             $cleanDate = Carbon::parse($validatedData['booking_date'])->format('Y-m-d');
             $cleanStartTime = Carbon::parse($validatedData['start_time'])->format('H:i:s');
             $cleanEndTime = Carbon::parse($validatedData['end_time'])->format('H:i:s');
@@ -81,7 +83,8 @@ class BookingController extends Controller
         $closingTime = Carbon::createFromFormat('Y-m-d H:i:s', $today . ' ' . $this->fixedClosingTime);
 
         if ($startDate->lessThan($openingTime) || $endDate->greaterThan($closingTime)) {
-            return back()->with('error', 'The requested time slot is outside the allowed booking hours (8:00 AM - 11:00 PM).');
+            // FIX: Corrected error message to reflect the actual closing time (18:00 PM) set in constraints.
+            return back()->with('error', 'The requested time slot is outside the allowed booking hours (8:00 AM - 6:00 PM).');
         }
 
         // 4. Future Time Check
@@ -96,7 +99,7 @@ class BookingController extends Controller
             ->where(function ($query) use ($validatedData) {
                 // Check for overlap: existing_start < new_end AND existing_end > new_start
                 $query->where('start_time', '<', $validatedData['end_time'])
-                      ->where('end_time', '>', $validatedData['start_time']);
+                    ->where('end_time', '>', $validatedData['start_time']);
             })
             ->count();
             
@@ -111,7 +114,7 @@ class BookingController extends Controller
             ->where(function ($query) use ($validatedData) {
                 // Check if the current user already has an overlapping booking
                 $query->where('start_time', '<', $validatedData['end_time'])
-                      ->where('end_time', '>', $validatedData['start_time']);
+                    ->where('end_time', '>', $validatedData['start_time']);
             })
             ->count();
         
@@ -121,18 +124,18 @@ class BookingController extends Controller
 
         // 7. Create the Booking
         try {
+            // Use the cleaned H:i:s format for database storage
             Booking::create([
                 'user_id' => Auth::id(),
                 'facility_id' => $facility->id,
-                'booking_date' => $validatedData['booking_date'],
-                'start_time' => $validatedData['start_time'],
-                'end_time' => $validatedData['end_time'],
+                'booking_date' => $cleanDate,
+                'start_time' => $cleanStartTime, // Using the standardized H:i:s format
+                'end_time' => $cleanEndTime,     // Using the standardized H:i:s format
                 'notes' => $validatedData['notes'] ?? null,
                 'status' => 'confirmed',
             ]);
 
             // FIX: Change redirect route from 'student.dashboard' to 'student.bookings.index' 
-            // as the latter is a working route (proven by destroy method) and is more relevant.
             return redirect()->route('student.bookings.index')->with('success', 'Facility successfully booked for ' . $startDate->format('g:i A') . '!');
         } catch (\Exception $e) {
             // This catch block should now only execute for a true database write failure.

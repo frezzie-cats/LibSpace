@@ -3,10 +3,11 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\FacilityController as StaffFacilityController;
 use App\Http\Controllers\Staff\BookingManagementController;
-use App\Http\Controllers\Staff\FeedbackController as StaffFeedbackController;
+use App\Http\Controllers\Controllers\Staff\FeedbackController as StaffFeedbackController;
 use App\Http\Controllers\Student\FacilityController as StudentFacilityController;
 use App\Http\Controllers\Student\BookingController;
 use App\Http\Controllers\Student\FeedbackController;
+use App\Http\Controllers\Student\StudentHomeController; // <--- ADDED: Import the dedicated Home Controller
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -23,8 +24,8 @@ Route::get('/', function () {
         if (Auth::user()->role === User::ROLE_STAFF) {
             return redirect()->route('staff.dashboard');
         } else {
-            // Default student redirect
-            return redirect()->route('student.facilities.index');
+            // Default student redirect now points to the new student.home
+            return redirect()->route('student.home');
         }
     }
     return view('welcome');
@@ -35,8 +36,8 @@ Route::get('/dashboard', function () {
     if (Auth::user()->role === User::ROLE_STAFF) {
         return redirect()->route('staff.dashboard');
     }
-    // Student redirect
-    return redirect()->route('student.facilities.index');
+    // Student redirect now points to the new student.home
+    return redirect()->route('student.home');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -89,7 +90,10 @@ Route::middleware(['auth', 'role:' . User::ROLE_STAFF])->prefix('staff')->name('
 
 Route::middleware(['auth', 'role:' . User::ROLE_STUDENT])->prefix('student')->name('student.')->group(function () {
 
-    // 1. Facility Viewing (Equivalent to the student's main dashboard)
+    // NEW: Student Home Page (URL: /student) - Now using the dedicated StudentHomeController
+    Route::get('/', [StudentHomeController::class, 'index'])->name('home');
+
+    // 1. Facility Viewing (URL: /student/facilities)
     Route::get('facilities', [StudentFacilityController::class, 'index'])->name('facilities.index');
     Route::get('facilities/{facility}', [StudentFacilityController::class, 'show'])->name('facilities.show');
 

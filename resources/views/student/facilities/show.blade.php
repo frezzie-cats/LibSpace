@@ -1,144 +1,113 @@
-<!-- 
-    NOTE: This assumes the following variables are passed from the controller:
-    $facility: The Facility model instance.
-    $bookings: A collection of existing bookings for the selected date (filtered by facility and date).
-    $today: The current date string ('Y-m-d').
--->
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Book: {{ $facility->name }}
-        </h2>
-    </x-slot>
+@extends('layouts.student')
+@section('title', 'Book: ' . $facility->name)
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <!-- Facility Card -->
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-8 border-t-4 border-indigo-500">
-                <h3 class="text-2xl font-bold mb-2 text-indigo-700">{{ $facility->name }}</h3>
-                <p class="text-gray-600 mb-1">Type: {{ ucfirst($facility->type) }}</p>
-                <p class="text-gray-600 mb-1">Capacity: {{ $facility->capacity }} simultaneous bookings</p>
-                <p class="text-gray-600 mb-4">Status: <span class="{{ $facility->status === 'available' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">{{ ucfirst($facility->status) }}</span></p>
-                
-                @if ($facility->status !== 'available')
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
-                        <p class="font-bold">Unavailable</p>
-                        <p>This facility cannot be booked at the moment.</p>
-                    </div>
-                @endif
-                
-                <p class="text-sm text-gray-500 mt-4">
-                    Booking is strictly for **today ({{ \Carbon\Carbon::parse($today)->format('F d, Y') }})** only, between 8:00 AM and 6:00 PM.
-                </p>
-            </div>
+@section('content')
 
-            <h3 class="text-xl font-semibold mb-4 text-gray-700">Available Time Slots (Today)</h3>
+    <a href="{{ route('student.facilities.index', ['type' => $facility->type]) }}" class="text-green-600 hover:text-green-700 text-sm mb-4 inline-flex items-center">
+        <i class="fas fa-arrow-left mr-2"></i> Back to {{ ucfirst($facility->type) }} Overview
+    </a>
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Facility Card -->
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-8 border-t-4 border-green-500">
+            <h3 class="text-2xl font-bold mb-2 text-gray-900">{{ $facility->name }}</h3>
+            <p class="text-gray-600 mb-1">Type: {{ ucfirst($facility->type) }}</p>
+            <p class="text-gray-600 mb-1">Capacity: {{ $facility->capacity }} simultaneous bookings</p>
+            <p class="text-gray-600 mb-4">Status: <span class="{{ $facility->status === 'available' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">{{ ucfirst($facility->status) }}</span></p>
             
-            <!-- Clarification for the user -->
-            <p class="text-sm text-yellow-600 bg-yellow-100 p-3 rounded-lg mb-6 border-l-4 border-yellow-500">
-                ⚠️ **Note on Slot Status:** Slots are marked as 'Passed' if the current server time is after the slot's start time (e.g., if it's 10:30 AM, the 9:00 AM slot is 'Passed'). 
-                Slots are marked 'Full' if the number of overlapping, confirmed bookings reaches the facility's capacity ({{ $facility->capacity }}).
+            @if ($facility->status !== 'available')
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                    <p class="font-bold">Unavailable</p>
+                    <p>This facility cannot be booked at the moment.</p>
+                </div>
+            @endif
+            
+            <p class="text-sm text-gray-500 mt-4">
+                Booking is strictly for **today ({{ \Carbon\Carbon::parse($bookingDate)->format('F d, Y') }})** only, strictly within the facility's operating hours **(8:00 AM to 6:00 PM)**.
             </p>
+        </div>
 
-            <!-- Time Slot Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="time-slot-grid">
+        <!-- Error/Success Messages (Must be before the slots for immediate feedback) -->
+        @if (session('success'))
+            <div class="mt-8 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded" role="alert">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="mt-8 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded" role="alert">
+                {{ session('error') }}
+            </div>
+        @endif
+
+
+        <h3 class="text-xl font-semibold mb-4 text-gray-700 mt-8">Available Time Slots (Today)</h3>
+        
+        <!-- Clarification for the user -->
+        <p class="text-sm text-yellow-600 bg-yellow-100 p-3 rounded-lg mb-6 border-l-4 border-yellow-500">
+            ⚠️ Note on Slot Status: Slots are marked as 'Passed' if the current server time is after the slot's start time. 
+            Slots are marked 'Full' if the number of overlapping, confirmed bookings reaches the facility's capacity ({{ $facility->capacity }}).
+        </p>
+
+        <!-- Time Slot Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="time-slot-grid">
+            
+            {{-- CRITICAL FIX: Loop directly over the slots calculated and passed by the FacilityController. --}}
+            @forelse ($availableSlots as $slot)
                 @php
-                    // Define the fixed opening and closing times
-                    $opening = \Carbon\Carbon::createFromTimeString('08:00');
-                    $closing = \Carbon\Carbon::createFromTimeString('18:00');
-                    // Interval is 60 minutes (1 hour)
-                    $interval = 60; 
-                    $currentTime = \Carbon\Carbon::now();
+                    $isAvailable = $slot['is_available'];
+                    $currentBookings = $slot['current_bookings'];
+
+                    // Determine Status Text and Class based on controller's pre-calculated logic
+                    $buttonClass = 'bg-gray-200 text-gray-500 cursor-not-allowed';
+                    $statusText = 'Unavailable';
+                    $isPast = false;
+
+                    // Check if the slot start time is in the past (based on server time now)
+                    if ($isAvailable) {
+                        $buttonClass = 'bg-green-500 text-white cursor-pointer hover:bg-green-600 transition duration-150 ease-in-out';
+                        $statusText = 'Available';
+                    } elseif (Carbon\Carbon::createFromFormat('H:i:s', $slot['start_time'])->lessThan(Carbon\Carbon::now()->setTimezone('Asia/Manila')->startOfMinute())) {
+                        // Check if the time slot has passed (based on the current time)
+                        $buttonClass = 'bg-gray-100 text-gray-400 cursor-not-allowed';
+                        $statusText = 'Passed';
+                        $isPast = true;
+                    } elseif ($currentBookings >= $facility->capacity) {
+                        $buttonClass = 'bg-red-500 text-white cursor-not-allowed hover:bg-red-600';
+                        $statusText = 'Full';
+                    }
+
+                    // 4. Merge all classes into one string for clean HTML
+                    $baseClasses = 'p-4 rounded-lg shadow-md font-medium text-sm text-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 h-20 flex flex-col justify-center items-center';
+                    $finalClasses = $baseClasses . ' ' . $buttonClass;
+                    
+                    if ($statusText === 'Available') {
+                        $finalClasses .= ' book-slot-btn'; // Add JS hook class
+                    }
                 @endphp
 
-                @while ($opening->lessThan($closing))
-                    @php
-                        $slotStart = $opening->copy();
-                        $slotEnd = $opening->copy()->addMinutes($interval);
-                        
-                        // Stop if the next slot exceeds the closing time (18:00)
-                        if ($slotEnd->greaterThan($closing)) {
-                            break;
-                        }
-
-                        $timeDisplay = $slotStart->format('g:i A') . ' - ' . $slotEnd->format('g:i A');
-                        
-                        // 1. Check if the slot is in the past
-                        $isPast = $slotStart->lessThan($currentTime);
-
-                        // 2. Check Capacity (only if the facility is available and the slot is not passed)
-                        $isFullyBooked = false;
-                        if ($facility->status === 'available' && !$isPast) {
-                            $overlappingBookings = \App\Models\Booking::where('facility_id', $facility->id)
-                                ->where('booking_date', $today)
-                                ->where('status', 'confirmed')
-                                ->where(function ($query) use ($slotStart, $slotEnd) {
-                                    // Overlap condition: existing_start < new_end AND existing_end > new_start
-                                    $query->where('start_time', '<', $slotEnd->format('H:i:s'))
-                                        ->where('end_time', '>', $slotStart->format('H:i:s'));
-                                })
-                                ->count();
-                            
-                            if ($overlappingBookings >= $facility->capacity) {
-                                $isFullyBooked = true;
-                            }
-                        }
-                        
-                        // 3. Determine Final Status and Class
-                        $buttonClass = 'bg-gray-200 text-gray-500 cursor-not-allowed';
-                        $statusText = 'Unavailable';
-
-                        if ($facility->status === 'available') {
-                            if ($isPast) {
-                                $buttonClass = 'bg-gray-100 text-gray-400 cursor-not-allowed';
-                                $statusText = 'Passed';
-                            } elseif ($isFullyBooked) {
-                                $buttonClass = 'bg-red-500 text-white cursor-not-allowed hover:bg-red-600';
-                                $statusText = 'Full';
-                            } else {
-                                $buttonClass = 'bg-green-500 text-white cursor-pointer hover:bg-green-600 transition duration-150 ease-in-out';
-                                $statusText = 'Available';
-                            }
-                        }
-
-                    @endphp
-
-                    <button 
-                        @if ($statusText === 'Available') 
-                            {{-- FIX: Using data-attributes to store values and a JS listener to attach behavior, avoiding inline JS quoting issues. --}}
-                            data-start-time="{{ $slotStart->format('H:i:s') }}"
-                            data-end-time="{{ $slotEnd->format('H:i:s') }}"
-                            data-time-display="{{ $timeDisplay }}"
-                            class="book-slot-btn {{ $buttonClass }}"
-                        @else
-                            disabled
-                            class="{{ $buttonClass }}"
-                        @endif
-                        class="p-4 rounded-lg shadow-md font-medium text-sm text-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 h-20 flex flex-col justify-center items-center"
-                    >
-                        <span class="text-base">{{ $slotStart->format('g:i A') }}</span>
-                        <span class="text-xs mt-1">{{ $statusText }}</span>
-                    </button>
-                    
-                    @php
-                        // Move to the next interval (60 minutes)
-                        $opening->addMinutes($interval);
-                    @endphp
-                @endwhile
-            </div>
-
-            <!-- Error/Success Messages -->
-            @if (session('success'))
-                <div class="mt-8 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded" role="alert">
-                    {{ session('success') }}
+                <button 
+                    @if ($statusText !== 'Available') 
+                        disabled
+                    @endif
+                    {{-- Data attributes store the values for the JavaScript listener --}}
+                    data-start-time="{{ $slot['start_time'] }}"
+                    data-end-time="{{ $slot['end_time'] }}"
+                    data-time-display="{{ $slot['label'] }}"
+                    class="{{ $finalClasses }}"
+                >
+                    <span class="text-base">{{ \Carbon\Carbon::parse($slot['start_time'])->format('g:i A') }}</span>
+                    <span class="text-xs mt-1">{{ $statusText }}</span>
+                    @if ($statusText === 'Available')
+                        <span class="text-xs font-normal text-white/80">({{ $currentBookings }}/{{ $facility->capacity }} booked)</span>
+                    @endif
+                </button>
+            @empty
+                <div class="col-span-full p-6 bg-gray-50 rounded-lg text-center text-gray-500">
+                    No available slots for today.
                 </div>
-            @endif
-            @if (session('error'))
-                <div class="mt-8 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded" role="alert">
-                    {{ session('error') }}
-                </div>
-            @endif
+            @endforelse
         </div>
+
     </div>
 
     <!-- Booking Modal Structure -->
@@ -148,14 +117,14 @@
                 Confirm Your Booking
             </h3>
             <div class="mt-2">
-                <p class="text-sm text-gray-500">
-                    You are booking **{{ $facility->name }}** for the slot: <span id="slot-display" class="font-semibold text-indigo-600"></span>.
+                <p class="text-sm text-gray-700">
+                    You are booking {{ $facility->name }} for the slot: <span id="slot-display" class="font-semibold text-green-600"></span>.
                 </p>
 
                 <form id="booking-form" method="POST" action="{{ route('student.bookings.store') }}" class="mt-4">
                     @csrf
                     <input type="hidden" name="facility_id" value="{{ $facility->id }}">
-                    <input type="hidden" name="booking_date" value="{{ $today }}">
+                    <input type="hidden" name="booking_date" value="{{ $bookingDate }}">
                     <input type="hidden" name="start_time" id="modal-start-time">
                     <input type="hidden" name="end_time" id="modal-end-time">
                     
@@ -168,7 +137,7 @@
                         <button type="button" id="close-modal-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-150">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition duration-150">
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-700 transition duration-150">
                             Confirm Booking
                         </button>
                     </div>
@@ -234,4 +203,4 @@
             });
         });
     </script>
-</x-app-layout>
+@endsection

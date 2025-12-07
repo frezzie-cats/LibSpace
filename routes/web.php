@@ -3,7 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\FacilityController as StaffFacilityController;
 use App\Http\Controllers\Staff\BookingManagementController;
-use App\Http\Controllers\Controllers\Staff\FeedbackController as StaffFeedbackController;
+use App\Http\Controllers\Staff\FeedbackController as StaffFeedbackController;
 use App\Http\Controllers\Student\FacilityController as StudentFacilityController;
 use App\Http\Controllers\Student\BookingController;
 use App\Http\Controllers\Student\FeedbackController;
@@ -70,9 +70,10 @@ Route::middleware(['auth', 'role:' . User::ROLE_STAFF])->prefix('staff')->name('
     Route::get('bookings/{booking}', [BookingManagementController::class, 'show'])->name('bookings.show');
 
     // ----------------------------------------------------
-    // Facility Feedback Review and Management (NEW)
+    // Facility Feedback Review and Management
     // ----------------------------------------------------
-    Route::prefix('feedbacks')->name('feedbacks.')->controller(controller: StaffFeedbackController::class)->group(function () {
+    // Simplified the ->controller() call by removing the named argument 'controller:'
+    Route::prefix('feedbacks')->name('feedbacks.')->controller(StaffFeedbackController::class)->group(function () {
         // GET /staff/feedbacks (Dashboard view of all feedback)
         Route::get('/', 'index')->name('index');
         

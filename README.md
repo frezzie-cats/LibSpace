@@ -1,6 +1,6 @@
 # 🚀 Student Facility Booking System
 
-This is a web application designed to **streamline the process of booking university facilities** (such as study rooms, nap pads, and specialized venues) by students. It provides a real-time view of availability, enforces booking policies (like time slots and daily limits), and offers an administration panel for facility management.
+This is a web application designed to **streamline the process of booking university facilities** (such as discussion rooms, nap pads, and activity center) by students. It provides a real-time view of availability, enforces booking policies (like time slots and daily limits), and offers an administration/library staff panel for facility management.
 
 The system is built on the **Laravel 10+ framework**, providing a robust, secure, and maintainable structure.
 
@@ -131,5 +131,3 @@ After seeding the database, you can typically log in with the following users (c
 This project is currently being developed. If you find any bugs or have feature suggestions, please open an issue in the repository.
 
 -----
-
-Would you like me to generate a simple UML diagram for the key entities (Users, Facilities, Bookings) to include in the README?

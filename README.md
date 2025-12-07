@@ -123,6 +123,7 @@ After seeding the database, you can typically log in with the following users (c
 
 1.  **Login:** Access the admin panel (usually `/admin`).
 2.  **Manage:** Create new facilities, adjust capacities, or view overall booking statistics.
+3.  **Review: Student Feedbacks**
 
 -----
 

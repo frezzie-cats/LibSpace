@@ -38,7 +38,7 @@
             <div class="p-6 flex flex-col flex-grow text-center">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Discussion Rooms</h3>
                 <p class="text-gray-600 mb-4 text-sm flex-grow">
-                    Ideal for group projects, meetings, and collaborative study sessions. Bookable by the hour for teams of 2 to 10.
+                    Ideal for group projects, meetings, and collaborative study sessions.
                 </p>
                 {{-- Button pushed to the bottom --}}
                 <div class="mt-auto"> 
@@ -76,7 +76,7 @@
                 </p>
                 {{-- Button pushed to the bottom --}}
                 <div class="mt-auto">
-                    <a href="{{ route('student.facilities.index', ['type' => 'activity_center']) }}" class="inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-900 transition duration-150">
+                    <a href="{{ route('student.facilities.index', ['type' => 'venue']) }}" class="inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-900 transition duration-150">
                         <i class="fas fa-search mr-2"></i> View Details & Book
                     </a>
                 </div>
@@ -87,7 +87,7 @@
 
 <div class="mt-12 p-8 bg-green-50 rounded-xl shadow-inner text-center">
     <h3 class="text-xl font-bold text-green-800 mb-3">Ready to Book?</h3>
-    <p class="text-green-700 mb-4">Search for a specific room number or equipment type.</p>
+    <p class="text-green-700 mb-4">Search for a specific room number.</p>
     <form action="{{ route('student.facilities.index') }}" method="GET" class="max-w-xl mx-auto flex space-x-2">
         <input type="search" name="search" placeholder="E.g., Room 301 or Projector"
                class="flex-1 px-4 py-3 border border-green-300 rounded-lg focus:ring-green-500 focus:border-green-500 shadow-sm"

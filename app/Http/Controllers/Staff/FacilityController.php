@@ -77,7 +77,7 @@ class FacilityController extends Controller
             'name' => ['required', 'string', 'max:255', Rule::unique('facilities')->ignore($facility->id)],
             'description' => 'nullable|string',
             // Facility types are now restricted to 'room' and 'pad' only.
-            'type' => ['required', 'string', Rule::in(['room', 'pad'])],
+            'type' => ['required', 'string', Rule::in(['room', 'pad', 'venue'])],
             'capacity' => 'required|integer|min:1',
             // Crucially, this allows staff to update the status
             'status' => ['required', Rule::in(['available', 'not available', 'under maintenance'])],

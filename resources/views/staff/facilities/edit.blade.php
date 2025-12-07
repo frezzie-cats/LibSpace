@@ -40,9 +40,9 @@
                         name="type" 
                         required>
                         <option value="">Select a Type</option>
-                        <option value="room" {{ old('type', $facility->type) == 'room' ? 'selected' : '' }}>Discussion Room</option>
-                        <option value="pad" {{ old('type', $facility->type) == 'pad' ? 'selected' : '' }}>Nap Pad</option>
-                        <option value="equipment" {{ old('type', $facility->type) == 'equipment' ? 'selected' : '' }}>Equipment</option>
+                        <option value="room" {{ old('type', $facility->type) == 'room' ? 'selected' : '' }}>Room</option>
+                        <option value="pad" {{ old('type', $facility->type) == 'pad' ? 'selected' : '' }}>Pad</option>
+                        <option value="venue" {{ old('type', $facility->type) == 'venue' ? 'selected' : '' }}>Venue</option>
                     </select>
                     @error('type')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

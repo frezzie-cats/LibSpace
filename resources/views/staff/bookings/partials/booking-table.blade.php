@@ -59,10 +59,6 @@
                             {{ ucfirst($booking->status) }}
                         </span>
                     </td>
-                    <!-- Action/Details -->
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="{{ route('staff.bookings.show', $booking) }}" class="text-indigo-600 hover:text-indigo-900 transition duration-150">Details</a>
-                    </td>
                 </tr>
             @endforeach
         </tbody>

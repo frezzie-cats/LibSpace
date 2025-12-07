@@ -1,59 +1,135 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 Student Facility Booking System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is a web application designed to **streamline the process of booking university facilities** (such as study rooms, nap pads, and specialized venues) by students. It provides a real-time view of availability, enforces booking policies (like time slots and daily limits), and offers an administration panel for facility management.
 
-## About Laravel
+The system is built on the **Laravel 10+ framework**, providing a robust, secure, and maintainable structure.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+-----
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### For Students
 
-## Learning Laravel
+  * **Real-time Availability:** View facility availability broken down into specific time slots (e.g., 8:00 AM - 9:00 AM).
+  * **Instant Booking:** Select an available slot and confirm a booking through a simple modal interface.
+  * **Dynamic Status:** Time slots are clearly marked as **Available**, **Full**, or **Passed** (if the slot time has already gone).
+  * **Personal Dashboard:** View all current and past bookings.
+  * **Cancellation:** Easily cancel pending bookings.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### For Administrators
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+  * **Facility Management:** Create, update, and delete facility records (capacity, type, status, name).
+  * **Booking Oversight:** View all current and future bookings across all facilities.
+  * **User Management (Basic):** Manage student accounts and access levels (if implemented).
 
-## Laravel Sponsors
+-----
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🛠️ Technologies Used
 
-### Premium Partners
+| Category | Technology | Description |
+| :--- | :--- | :--- |
+| **Backend** | PHP (\>= 8.1) | The primary server-side scripting language. |
+| **Framework** | Laravel 10+ | Robust MVC framework for system architecture. |
+| **Database** | MySQL / SQLite | Data persistence for facilities, users, and bookings. |
+| **Frontend** | Blade Templates | Laravel's templating engine. |
+| **Styling** | **Tailwind CSS** | Utility-first CSS framework for responsive design. |
+| **State** | Session Management | Handling user login state and flash messages. |
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+-----
 
-## Contributing
+## ⚙️ Installation and Setup
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Follow these steps to get a local copy of the project running.
 
-## Code of Conduct
+### Prerequisites
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+  * PHP (\>= 8.1)
+  * Composer
+  * Node.js & npm (for Tailwind CSS compilation)
+  * A database (MySQL, PostgreSQL, or SQLite)
 
-## Security Vulnerabilities
+### Installation Steps
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1.  **Clone the Repository**
 
-## License
+    ```bash
+    git clone [YOUR_REPOSITORY_URL]
+    cd facility-booking-system
+    ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+2.  **Install PHP Dependencies**
+
+    ```bash
+    composer install
+    ```
+
+3.  **Configure Environment**
+
+      * Copy the example environment file:
+        ```bash
+        cp .env.example .env
+        ```
+      * Generate a unique application key:
+        ```bash
+        php artisan key:generate
+        ```
+      * Edit the **.env** file and update your database credentials (`DB_CONNECTION`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
+
+4.  **Run Migrations and Seed Data**
+    This step sets up the database schema and populates it with initial data (e.g., a few facility types and an admin user).
+
+    ```bash
+    php artisan migrate --seed
+    ```
+
+5.  **Install and Compile Frontend Assets**
+
+    ```bash
+    npm install
+    npm run dev
+    # For development/watching changes:
+    # npm run watch
+    ```
+
+6.  **Start the Local Server**
+
+    ```bash
+    php artisan serve
+    ```
+
+    > The application will typically be accessible at **[http://127.0.0.1:8000](http://127.0.0.1:8000)**.
+
+-----
+
+## 🧑‍💻 Usage
+
+### Initial Credentials
+
+After seeding the database, you can typically log in with the following users (check your specific seeder for exact details):
+
+| User Type | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@example.com` | `password` |
+| **Student** | `student@example.com` | `password` |
+
+### Student Workflow
+
+1.  **Login:** Access the dashboard.
+2.  **View Facilities:** Navigate to `/student/facilities`.
+3.  **Select Facility:** Click on a facility (e.g., "Nap Pad") to see its details.
+4.  **Book Slot:** Click on an **Available** time slot button and confirm the booking in the modal.
+
+### Admin Workflow
+
+1.  **Login:** Access the admin panel (usually `/admin`).
+2.  **Manage:** Create new facilities, adjust capacities, or view overall booking statistics.
+
+-----
+
+## 🤝 Contributing
+
+This project is currently being developed. If you find any bugs or have feature suggestions, please open an issue in the repository.
+
+-----
+
+Would you like me to generate a simple UML diagram for the key entities (Users, Facilities, Bookings) to include in the README?

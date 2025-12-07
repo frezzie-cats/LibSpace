@@ -3,55 +3,64 @@
 
 @section('content')
 
+@php
+    // --- Dynamic Color Mapping ---
+    $facilityColors = [
+        'room' => 'border-blue-500',
+        'pad' => 'border-indigo-500', // Using indigo for Nap Pad
+        'venue' => 'border-orange-500',
+    ];
+    
+    // Get the color class, defaulting to a gray if type is unexpected
+    $borderColorClass = $facilityColors[$facility->type] ?? 'border-gray-500';
+@endphp
+
     <a href="{{ route('student.facilities.index', ['type' => $facility->type]) }}" class="text-green-600 hover:text-green-700 text-sm mb-4 inline-flex items-center">
         <i class="fas fa-arrow-left mr-2"></i> Back to {{ ucfirst($facility->type) }} Overview
     </a>
 
     <div class="max-w-4xl mx-auto">
-        <!-- Facility Card -->
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-8 border-t-4 border-green-500">
+        
+        {{-- =================================== --}}
+        {{-- I. FLASH MESSAGES (SUCCESS ONLY) --}}
+        {{-- =================================== --}}
+
+        @if (session('success'))
+            <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded" role="alert">
+                {{ session('success') }}
+            </div>
+        @endif
+        
+        {{-- ERROR MESSAGES (session('error') and $errors->any()) are assumed to be handled by layouts.student --}}
+
+        {{-- =================================== --}}
+        {{-- II. FACILITY DETAILS CARD --}}
+        {{-- =================================== --}}
+
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-8 border-t-4 {{ $borderColorClass }}">
             <h3 class="text-2xl font-bold mb-2 text-gray-900">{{ $facility->name }}</h3>
             <p class="text-gray-600 mb-1">Type: {{ ucfirst($facility->type) }}</p>
             <p class="text-gray-600 mb-1">Capacity: {{ $facility->capacity }} simultaneous bookings</p>
             <p class="text-gray-600 mb-4">Status: <span class="{{ $facility->status === 'available' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">{{ ucfirst($facility->status) }}</span></p>
-            
-            @if ($facility->status !== 'available')
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
-                    <p class="font-bold">Unavailable</p>
-                    <p>This facility cannot be booked at the moment.</p>
-                </div>
-            @endif
             
             <p class="text-sm text-gray-500 mt-4">
                 Booking is strictly for **today ({{ \Carbon\Carbon::parse($bookingDate)->format('F d, Y') }})** only, strictly within the facility's operating hours **(8:00 AM to 6:00 PM)**.
             </p>
         </div>
 
-        <!-- Error/Success Messages (Must be before the slots for immediate feedback) -->
-        @if (session('success'))
-            <div class="mt-8 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded" role="alert">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="mt-8 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded" role="alert">
-                {{ session('error') }}
-            </div>
-        @endif
-
-
+        {{-- =================================== --}}
+        {{-- III. TIME SLOT SELECTION --}}
+        {{-- =================================== --}}
+        
         <h3 class="text-xl font-semibold mb-4 text-gray-700 mt-8">Available Time Slots (Today)</h3>
         
-        <!-- Clarification for the user -->
         <p class="text-sm text-yellow-600 bg-yellow-100 p-3 rounded-lg mb-6 border-l-4 border-yellow-500">
             ⚠️ Note on Slot Status: Slots are marked as 'Passed' if the current server time is after the slot's start time. 
             Slots are marked 'Full' if the number of overlapping, confirmed bookings reaches the facility's capacity ({{ $facility->capacity }}).
         </p>
 
-        <!-- Time Slot Grid -->
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="time-slot-grid">
             
-            {{-- CRITICAL FIX: Loop directly over the slots calculated and passed by the FacilityController. --}}
             @forelse ($availableSlots as $slot)
                 @php
                     $isAvailable = $slot['is_available'];
@@ -110,7 +119,10 @@
 
     </div>
 
-    <!-- Booking Modal Structure -->
+    {{-- =================================== --}}
+    {{-- IV. BOOKING MODAL STRUCTURE --}}
+    {{-- =================================== --}}
+
     <div id="booking-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center z-50 transition-opacity duration-300">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
@@ -146,7 +158,10 @@
         </div>
     </div>
 
-    <!-- JavaScript for Modal Handling and Event Listeners -->
+    {{-- =================================== --}}
+    {{-- V. JAVASCRIPT FOR MODAL & EVENTS --}}
+    {{-- =================================== --}}
+
     <script>
         // Helper function to show/hide the modal
         function toggleModal(show) {

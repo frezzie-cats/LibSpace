@@ -1,166 +1,135 @@
-Student Facility Booking System
+# 🚀 Student Facility Booking System
 
-🚀 Project Overview
+This is a web application designed to **streamline the process of booking university facilities** (such as study rooms, nap pads, and specialized venues) by students. It provides a real-time view of availability, enforces booking policies (like time slots and daily limits), and offers an administration panel for facility management.
 
-This is a web application designed to streamline the process of booking university facilities (such as discussion rooms, nap pads, and activity center) by students. It provides a real-time view of availability, enforces booking policies (like time slots and daily limits), and offers an administration panel for facility management.
+The system is built on the **Laravel 10+ framework**, providing a robust, secure, and maintainable structure.
 
-The system is built on the Laravel framework, providing a robust, secure, and maintainable structure.
+-----
 
-✨ Key Features
+## ✨ Key Features
 
-For Students:
+### For Students
 
-Real-time Availability: View facility availability broken down into specific time slots (e.g., 8:00 AM - 9:00 AM).
+  * **Real-time Availability:** View facility availability broken down into specific time slots (e.g., 8:00 AM - 9:00 AM).
+  * **Instant Booking:** Select an available slot and confirm a booking through a simple modal interface.
+  * **Dynamic Status:** Time slots are clearly marked as **Available**, **Full**, or **Passed** (if the slot time has already gone).
+  * **Personal Dashboard:** View all current and past bookings.
+  * **Cancellation:** Easily cancel pending bookings.
 
-Instant Booking: Select an available slot and confirm a booking through a simple modal interface.
+### For Administrators
 
-Dynamic Status: Time slots are clearly marked as Available, Full, or Passed (if the slot time has already gone).
+  * **Facility Management:** Create, update, and delete facility records (capacity, type, status, name).
+  * **Booking Oversight:** View all current and future bookings across all facilities.
+  * **User Management (Basic):** Manage student accounts and access levels (if implemented).
 
-Personal Dashboard: View all current and past bookings.
+-----
 
-Cancellation: Easily cancel pending bookings.
+## 🛠️ Technologies Used
 
-For Administrators:
+| Category | Technology | Description |
+| :--- | :--- | :--- |
+| **Backend** | PHP (\>= 8.1) | The primary server-side scripting language. |
+| **Framework** | Laravel 10+ | Robust MVC framework for system architecture. |
+| **Database** | MySQL / SQLite | Data persistence for facilities, users, and bookings. |
+| **Frontend** | Blade Templates | Laravel's templating engine. |
+| **Styling** | **Tailwind CSS** | Utility-first CSS framework for responsive design. |
+| **State** | Session Management | Handling user login state and flash messages. |
 
-Facility Management: Create, update, and delete facility records (capacity, type, status, name).
+-----
 
-Booking Oversight: View all current and future bookings across all facilities.
-
-User Management (Basic): Manage student accounts and access levels (if implemented).
-
-🛠️ Technologies Used
-
-Category
-
-Technology
-
-Description
-
-Backend
-
-PHP
-
-The primary server-side scripting language.
-
-Framework
-
-Laravel 10+
-
-Robust MVC framework for system architecture.
-
-Database
-
-MySQL / SQLite
-
-Data persistence for facilities, users, and bookings.
-
-Frontend
-
-Blade Templates
-
-Laravel's templating engine.
-
-Styling
-
-Tailwind CSS
-
-Utility-first CSS framework for responsive design.
-
-State
-
-Session Management
-
-Handling user login state and flash messages.
-
-⚙️ Installation and Setup
+## ⚙️ Installation and Setup
 
 Follow these steps to get a local copy of the project running.
 
-Prerequisites
+### Prerequisites
 
-PHP (>= 8.1)
+  * PHP (\>= 8.1)
+  * Composer
+  * Node.js & npm (for Tailwind CSS compilation)
+  * A database (MySQL, PostgreSQL, or SQLite)
 
-Composer
+### Installation Steps
 
-Node.js & npm (for Tailwind CSS compilation)
+1.  **Clone the Repository**
 
-A database (MySQL, PostgreSQL, or SQLite)
+    ```bash
+    git clone [YOUR_REPOSITORY_URL]
+    cd facility-booking-system
+    ```
 
-1. Clone the Repository
+2.  **Install PHP Dependencies**
 
-git clone [YOUR_REPOSITORY_URL]
-cd facility-booking-system
+    ```bash
+    composer install
+    ```
 
+3.  **Configure Environment**
 
-2. Install PHP Dependencies
+      * Copy the example environment file:
+        ```bash
+        cp .env.example .env
+        ```
+      * Generate a unique application key:
+        ```bash
+        php artisan key:generate
+        ```
+      * Edit the **.env** file and update your database credentials (`DB_CONNECTION`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
 
-composer install
+4.  **Run Migrations and Seed Data**
+    This step sets up the database schema and populates it with initial data (e.g., a few facility types and an admin user).
 
+    ```bash
+    php artisan migrate --seed
+    ```
 
-3. Configure Environment
+5.  **Install and Compile Frontend Assets**
 
-Copy the example environment file:
+    ```bash
+    npm install
+    npm run dev
+    # For development/watching changes:
+    # npm run watch
+    ```
 
-cp .env.example .env
+6.  **Start the Local Server**
 
+    ```bash
+    php artisan serve
+    ```
 
-Generate a unique application key:
+    > The application will typically be accessible at **[http://127.0.0.1:8000](http://127.0.0.1:8000)**.
 
-php artisan key:generate
+-----
 
+## 🧑‍💻 Usage
 
-Edit the .env file and update your database credentials (DB_CONNECTION, DB_DATABASE, DB_USERNAME, DB_PASSWORD).
-
-4. Run Migrations and Seed Data
-
-This step sets up the database schema and populates it with initial data (e.g., a few facility types and an admin user).
-
-php artisan migrate --seed
-
-
-5. Install and Compile Frontend Assets
-
-npm install
-npm run dev
-# For development/watching changes:
-# npm run watch
-
-
-6. Start the Local Server
-
-php artisan serve
-
-
-The application will typically be accessible at http://127.0.0.1:8000.
-
-🧑‍💻 Usage
-
-Initial Credentials
+### Initial Credentials
 
 After seeding the database, you can typically log in with the following users (check your specific seeder for exact details):
 
-Admin Email: admin@example.com
+| User Type | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@example.com` | `password` |
+| **Student** | `student@example.com` | `password` |
 
-Student Email: student@example.com
+### Student Workflow
 
-Password for both: password
+1.  **Login:** Access the dashboard.
+2.  **View Facilities:** Navigate to `/student/facilities`.
+3.  **Select Facility:** Click on a facility (e.g., "Nap Pad") to see its details.
+4.  **Book Slot:** Click on an **Available** time slot button and confirm the booking in the modal.
 
-Student Workflow
+### Admin Workflow
 
-Login: Access the dashboard.
+1.  **Login:** Access the admin panel (usually `/admin`).
+2.  **Manage:** Create new facilities, adjust capacities, or view overall booking statistics.
 
-View Facilities: Navigate to /student/facilities.
+-----
 
-Select Facility: Click on a facility (e.g., "Nap Pad") to see its show view.
-
-Book Slot: Click on an Available time slot button and confirm the booking in the modal.
-
-Admin Workflow
-
-Login: Access the admin panel (usually /admin).
-
-Manage: Create new facilities, adjust capacities, or view overall booking statistics.
-
-🤝 Contributing
+## 🤝 Contributing
 
 This project is currently being developed. If you find any bugs or have feature suggestions, please open an issue in the repository.
+
+-----
+
+Would you like me to generate a simple UML diagram for the key entities (Users, Facilities, Bookings) to include in the README?

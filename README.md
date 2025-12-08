@@ -1,59 +1,166 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Student Facility Booking System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+🚀 Project Overview
 
-## About Laravel
+This is a web application designed to streamline the process of booking university facilities (such as discussion rooms, nap pads, and activity center) by students. It provides a real-time view of availability, enforces booking policies (like time slots and daily limits), and offers an administration panel for facility management.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The system is built on the Laravel framework, providing a robust, secure, and maintainable structure.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+✨ Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+For Students:
 
-## Learning Laravel
+Real-time Availability: View facility availability broken down into specific time slots (e.g., 8:00 AM - 9:00 AM).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Instant Booking: Select an available slot and confirm a booking through a simple modal interface.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Dynamic Status: Time slots are clearly marked as Available, Full, or Passed (if the slot time has already gone).
 
-## Laravel Sponsors
+Personal Dashboard: View all current and past bookings.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Cancellation: Easily cancel pending bookings.
 
-### Premium Partners
+For Administrators:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Facility Management: Create, update, and delete facility records (capacity, type, status, name).
 
-## Contributing
+Booking Oversight: View all current and future bookings across all facilities.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+User Management (Basic): Manage student accounts and access levels (if implemented).
 
-## Code of Conduct
+🛠️ Technologies Used
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Category
 
-## Security Vulnerabilities
+Technology
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Description
 
-## License
+Backend
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+PHP
+
+The primary server-side scripting language.
+
+Framework
+
+Laravel 10+
+
+Robust MVC framework for system architecture.
+
+Database
+
+MySQL / SQLite
+
+Data persistence for facilities, users, and bookings.
+
+Frontend
+
+Blade Templates
+
+Laravel's templating engine.
+
+Styling
+
+Tailwind CSS
+
+Utility-first CSS framework for responsive design.
+
+State
+
+Session Management
+
+Handling user login state and flash messages.
+
+⚙️ Installation and Setup
+
+Follow these steps to get a local copy of the project running.
+
+Prerequisites
+
+PHP (>= 8.1)
+
+Composer
+
+Node.js & npm (for Tailwind CSS compilation)
+
+A database (MySQL, PostgreSQL, or SQLite)
+
+1. Clone the Repository
+
+git clone [YOUR_REPOSITORY_URL]
+cd facility-booking-system
+
+
+2. Install PHP Dependencies
+
+composer install
+
+
+3. Configure Environment
+
+Copy the example environment file:
+
+cp .env.example .env
+
+
+Generate a unique application key:
+
+php artisan key:generate
+
+
+Edit the .env file and update your database credentials (DB_CONNECTION, DB_DATABASE, DB_USERNAME, DB_PASSWORD).
+
+4. Run Migrations and Seed Data
+
+This step sets up the database schema and populates it with initial data (e.g., a few facility types and an admin user).
+
+php artisan migrate --seed
+
+
+5. Install and Compile Frontend Assets
+
+npm install
+npm run dev
+# For development/watching changes:
+# npm run watch
+
+
+6. Start the Local Server
+
+php artisan serve
+
+
+The application will typically be accessible at http://127.0.0.1:8000.
+
+🧑‍💻 Usage
+
+Initial Credentials
+
+After seeding the database, you can typically log in with the following users (check your specific seeder for exact details):
+
+Admin Email: admin@example.com
+
+Student Email: student@example.com
+
+Password for both: password
+
+Student Workflow
+
+Login: Access the dashboard.
+
+View Facilities: Navigate to /student/facilities.
+
+Select Facility: Click on a facility (e.g., "Nap Pad") to see its show view.
+
+Book Slot: Click on an Available time slot button and confirm the booking in the modal.
+
+Admin Workflow
+
+Login: Access the admin panel (usually /admin).
+
+Manage: Create new facilities, adjust capacities, or view overall booking statistics.
+
+🤝 Contributing
+
+This project is currently being developed. If you find any bugs or have feature suggestions, please open an issue in the repository.

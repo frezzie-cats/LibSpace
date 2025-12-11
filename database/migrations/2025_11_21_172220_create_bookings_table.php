@@ -33,9 +33,12 @@ return new class extends Migration
 
             $table->timestamps();
 
-            // Constraint to prevent double-booking the SAME facility at the SAME time
-            // This is primarily for ensuring unique entries, but logic handles overlaps.
-            $table->unique(['facility_id', 'booking_date', 'start_time', 'end_time']);
+            // REMOVED: The unique constraint was removed because it overrode the application's capacity logic.
+            // Multiple users must be able to book the same facility at the same time if capacity > 1.
+            // Capacity is now enforced entirely within the BookingController store method.
+            
+            // NOTE: You can, however, add a unique index to prevent a single user from booking the same slot twice
+            $table->unique(['user_id', 'booking_date', 'start_time', 'end_time'], 'user_unique_booking');
         });
     }
 

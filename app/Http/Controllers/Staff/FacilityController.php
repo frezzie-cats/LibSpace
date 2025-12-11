@@ -41,7 +41,7 @@ class FacilityController extends Controller
             'name' => 'required|string|max:255|unique:facilities,name',
             'description' => 'nullable|string',
             // Facility types are now restricted to 'room' and 'pad' only.
-            'type' => ['required', 'string', Rule::in(['room', 'pad'])],
+            'type' => ['required', 'string', Rule::in(['room', 'pad', 'venue'])],
             'capacity' => 'required|integer|min:1',
             // Ensure status is one of the allowed values
             'status' => ['required', Rule::in(['available', 'not available', 'under maintenance'])],

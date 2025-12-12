@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
-use App\Models\Feedback; // ADDED: Import the new Feedback Model
+use App\Models\Feedback;
+use App\Models\Booking; // ADDED: Import the Booking Model to check for past bookings
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +22,13 @@ class FeedbackController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // === NEW CONSTRAINT: CHECK FOR EXISTING BOOKINGS ===
+        // Students must have at least one booking (past or present) to submit feedback.
+        if (!Booking::where('user_id', Auth::id())->exists()) {
+            return redirect()->back()->withInput()->with('error', 'You must have at least one past or current facility booking to submit feedback.');
+        }
+        // ===================================================
+
         // 1. Validate all required fields (subject, rating, and message)
         $validated = $request->validate([
             'subject' => ['required', 'string', 'in:discussion,center,pad,other'],

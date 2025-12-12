@@ -44,7 +44,7 @@
             <p class="text-gray-600 mb-4">Status: <span class="{{ $facility->status === 'available' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold' }}">{{ ucfirst($facility->status) }}</span></p>
             
             <p class="text-sm text-gray-500 mt-4">
-                Booking is strictly for **today ({{ \Carbon\Carbon::parse($bookingDate)->format('F d, Y') }})** only, strictly within the facility's operating hours **(8:00 AM to 6:00 PM)**.
+                Booking is strictly for today ({{ \Carbon\Carbon::parse($bookingDate)->format('F d, Y') }}) only, strictly within the facility's operating hours (8:00 AM to 6:00 PM).
             </p>
         </div>
 

@@ -70,9 +70,9 @@ to prevent messages from appearing twice.
                     </div>
                     
                     <div class="flex items-center space-x-3">
-                        <span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
-                            CONFIRMED
-                        </span>
+                        <!-- <span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                            BOOKED SUCCESSFULLY
+                        </span> -->
                         
                         <!-- Cancellation Form -->
                         <form action="{{ route('student.bookings.destroy', $booking) }}" 

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\FacilityController as StaffFacilityController;
 use App\Http\Controllers\Staff\BookingManagementController;
 use App\Http\Controllers\Staff\FeedbackController as StaffFeedbackController;
+use App\Http\Controllers\Staff\ReportController as StaffReportController; // NEW: Import Report Controller
 use App\Http\Controllers\Student\FacilityController as StudentFacilityController;
 use App\Http\Controllers\Student\BookingController;
 use App\Http\Controllers\Student\FeedbackController;
@@ -72,7 +73,6 @@ Route::middleware(['auth', 'role:' . User::ROLE_STAFF])->prefix('staff')->name('
     // ----------------------------------------------------
     // Facility Feedback Review and Management
     // ----------------------------------------------------
-    // Simplified the ->controller() call by removing the named argument 'controller:'
     Route::prefix('feedbacks')->name('feedbacks.')->controller(StaffFeedbackController::class)->group(function () {
         // GET /staff/feedbacks (Dashboard view of all feedback)
         Route::get('/', 'index')->name('index');
@@ -80,6 +80,12 @@ Route::middleware(['auth', 'role:' . User::ROLE_STAFF])->prefix('staff')->name('
         // PATCH /staff/feedbacks/{feedback} (Update status via dropdown)
         Route::patch('/{feedback}', 'updateStatus')->name('update_status');
     });
+
+    // ----------------------------------------------------
+    // NEW: Reports Generation and Analytics
+    // ----------------------------------------------------
+    Route::get('reports', [StaffReportController::class, 'index'])->name('reports.index');
+
 });
 
 
